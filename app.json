@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "MILIEU",
+    "slug": "milieu",
+    "scheme": "milieu",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#090909",
+    "ios": { "bundleIdentifier": "tn.milieu.app", "supportsTablet": true },
+    "android": { "package": "tn.milieu.app", "edgeToEdgeEnabled": true },
+    "web": { "bundler": "metro", "output": "single", "name": "MILIEU", "themeColor": "#090909" },
+    "plugins": ["expo-router", "expo-localization"],
+    "extra": { "supportsRTL": true }
+  }
+}

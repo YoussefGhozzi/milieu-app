@@ -1,0 +1,19 @@
+{
+  "name": "@milieu/app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "App membre MILIEU (Expo Router, NativeWind) : démo client sur données simulées",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "web": "expo start --web",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "export:web": "expo export --platform web",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@milieu/contracts": "*",
+    "@milieu/ui": "*"
+  }
+}
