@@ -7,6 +7,7 @@ import { Badge, Button, Text, TokenAmount, cn, colors } from '@milieu/ui';
 import { useDemo } from '@/demo/DemoProvider';
 import { BottomBar, Header } from '@/components/Chrome';
 import { Tap } from '@/components/motion';
+import { Grid } from '@/components/Grid';
 import { dt } from '@/lib/format';
 
 /** A17 — Boutique de packs : prix par jeton, économies, équivalence en cours. */
@@ -20,9 +21,9 @@ export default function Shop() {
     <View className="flex-1 bg-background">
       <Header title="Acheter des jetons" right={<TokenAmount value={balance} size="sm" />} />
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
-        <View className="w-full max-w-xl gap-3 self-center px-5">
+        <View className="w-full max-w-3xl gap-3 self-center px-5">
           <Text tone="muted" className="mb-2">Packs prépayés, sans abonnement. Vos jetons achetés n’expirent jamais.</Text>
-          {studio.packs.map((p, i) => {
+          <Grid>{studio.packs.map((p, i) => {
             const perToken = p.priceTnd / p.tokens;
             const saving = Math.round((1 - perToken / base) * 100);
             const active = p.id === selected;
@@ -32,7 +33,7 @@ export default function Shop() {
                   <View className={cn('rounded-xl border-2 p-5', active ? 'border-brand bg-brand-soft' : 'border-border bg-surface')}>
                     <View className="flex-row items-start justify-between">
                       <View className="gap-1">
-                        <View className="flex-row items-center gap-2">
+                        <View className="flex-row flex-wrap items-center gap-2">
                           <Text variant="heading" className="font-bold tracking-widest">{p.name}</Text>
                           {p.badge === 'popular' ? <Badge tone="brand" label="Le plus choisi" /> : null}
                           {p.badge === 'best_value' ? <Badge tone="success" label="Meilleur prix" /> : null}
@@ -57,7 +58,7 @@ export default function Shop() {
                 </Tap>
               </Animated.View>
             );
-          })}
+          })}</Grid>
           <View className="mt-2 flex-row items-center gap-3 rounded-lg border border-border bg-surface-sunken p-4">
             <InfinityIcon size={20} color={colors.brand.DEFAULT} />
             <Text variant="caption" tone="muted" className="flex-1">Bonus de bienvenue, offres heures creuses et récompenses s’ajoutent automatiquement à votre solde.</Text>

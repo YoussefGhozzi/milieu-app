@@ -4,9 +4,9 @@
     "slug": "milieu",
     "scheme": "milieu",
     "version": "0.1.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#090909",
+    "backgroundColor": "#121316",
     "ios": {
       "bundleIdentifier": "tn.milieu.app",
       "supportsTablet": true
@@ -19,7 +19,7 @@
       "bundler": "metro",
       "output": "single",
       "name": "MILIEU",
-      "themeColor": "#090909"
+      "themeColor": "#121316"
     },
     "plugins": [
       "expo-router",

@@ -22,7 +22,7 @@ export default function Notifications() {
     <View className="flex-1 bg-background">
       <Header title="Notifications" right={unread > 0 ? <Text variant="label" tone="brand" onPress={markAllRead}>Tout lire</Text> : undefined} />
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
-        <View className="w-full max-w-xl gap-2 self-center px-5">
+        <View className="w-full max-w-2xl gap-2 self-center px-5">
           {state.notifications.length === 0 ? (
             <EmptyState icon={<BellOff size={28} color={colors.foreground.muted} />} title="Rien de nouveau" body="Vos rappels et alertes de places apparaîtront ici." />
           ) : state.notifications.map((n, i) => {

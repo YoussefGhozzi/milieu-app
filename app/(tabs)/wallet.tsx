@@ -23,7 +23,7 @@ export default function Wallet() {
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
-      <View className="w-full max-w-xl self-center px-5">
+      <View className="w-full max-w-2xl self-center px-5">
         <Appear><Text variant="display">Portefeuille</Text></Appear>
 
         <Appear index={1}>

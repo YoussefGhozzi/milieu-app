@@ -56,7 +56,7 @@ export default function BookingSuccess() {
                   <Text variant="label" tone="muted">avec {v.coach.firstName} {v.coach.lastName}</Text>
                 </View>
                 <View className="rounded-lg bg-white p-2">
-                  <QRCode value={booking.qr ?? booking.id} size={84} backgroundColor="#ffffff" color="#090909" />
+                  <QRCode value={booking.qr ?? booking.id} size={84} backgroundColor="#ffffff" color="#121316" />
                 </View>
               </View>
               <View className="flex-row items-center justify-between border-t border-border px-5 py-3">

@@ -35,7 +35,7 @@ export default function HistoryScreen() {
         {FILTERS.map((x) => <Chip key={x.key} label={x.label} selected={filter === x.key} onPress={() => setFilter(x.key)} />)}
       </ScrollView>
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
-        <View className="w-full max-w-xl gap-5 self-center px-5 pt-4">
+        <View className="w-full max-w-2xl gap-5 self-center px-5 pt-4">
           {entries.length === 0 ? (
             <EmptyState icon={<ReceiptText size={28} color={colors.foreground.muted} />} title="Aucun mouvement" body="Rien à afficher pour ce filtre." />
           ) : (Object.entries(groups) as [string, LedgerEntry[]][]).map(([day, list], gi) => (

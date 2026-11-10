@@ -8,6 +8,7 @@ import { Chip, EmptyState, Text, cn, colors } from '@milieu/ui';
 import { useDemo } from '@/demo/DemoProvider';
 import { ClassCard } from '@/components/ClassVisuals';
 import { Tap } from '@/components/motion';
+import { Grid } from '@/components/Grid';
 import { addDays, dayShort, sameDay, startOfDay } from '@/lib/format';
 
 function LiveDot() {
@@ -39,7 +40,7 @@ export default function Planning() {
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 12 }}>
-      <View className="w-full max-w-xl self-center px-5">
+      <View className="w-full max-w-3xl self-center px-5">
         <View className="flex-row items-end justify-between">
           <Text variant="display">Planning</Text>
           <View className="mb-2 flex-row items-center gap-2">
@@ -71,7 +72,7 @@ export default function Planning() {
           <Chip key={d.id} label={d.name} selected={discipline === d.id} onPress={() => setDiscipline(discipline === d.id ? 'all' : d.id)} />
         ))}
       </ScrollView>
-      <View className="mt-2 w-full max-w-xl flex-row gap-2 self-center px-5">
+      <View className="mt-2 w-full max-w-3xl flex-row flex-wrap gap-x-4 self-center px-5">
         {[{ id: 'all', name: 'Toutes les salles' }, ...studio.rooms].map((r) => (
           <Text key={r.id} variant="label" tone={room === r.id ? 'brand' : 'subtle'} onPress={() => setRoom(r.id)}
             className={cn('py-2', room === r.id && 'font-semibold underline')}>{r.name}</Text>
@@ -79,17 +80,17 @@ export default function Planning() {
       </View>
 
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
-        <View className="w-full max-w-xl gap-3 self-center px-5 pt-2">
+        <View className="w-full max-w-3xl gap-3 self-center px-5 pt-2">
           <Text variant="caption" tone="muted">{list.length} cours · {days[day].toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</Text>
           {list.length === 0 ? (
             <EmptyState icon={<CalendarX2 size={28} color={colors.foreground.muted} />} title="Aucun cours"
               body="Aucun cours ne correspond à ces filtres ce jour-là. Essayez un autre jour ou une autre discipline." />
           ) : (
-            list.map((s, i) => (
+            <Grid>{list.map((s, i) => (
               <Animated.View key={`${s.id}-${discipline}-${room}-${day}`} entering={FadeInDown.delay(i * 40).duration(350)}>
                 <ClassCard v={view(s.id)!} status={bookingFor(s.id)?.status} onPress={() => router.push(`/class/${s.id}`)} />
               </Animated.View>
-            ))
+            ))}</Grid>
           )}
         </View>
       </ScrollView>

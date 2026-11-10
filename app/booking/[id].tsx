@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, View } from 'react-native';
+import { Modal, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import QRCode from 'react-native-qrcode-svg';
@@ -17,6 +17,9 @@ export default function BookingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const toast = useToast();
   const { state, view, cancel, studio } = useDemo();
+  const { width } = useWindowDimensions();
+  const qrSize = Math.min(190, width - 150);
+  const qrFull = Math.min(300, width - 80);
   const [full, setFull] = useState(false);
   const [sheet, setSheet] = useState(false);
   const booking = state.bookings.find((b) => b.id === id);
@@ -79,7 +82,7 @@ export default function BookingDetail() {
               {booking.status === 'booked' && upcoming ? (
                 <Animated.View entering={ZoomIn.delay(200).springify()} style={{ alignItems: 'center', padding: 20, gap: 12 }}>
                   <Pressable accessibilityRole="button" accessibilityLabel="Afficher le QR en plein écran" onPress={() => setFull(true)} className="rounded-xl bg-white p-4">
-                    <QRCode value={booking.qr ?? booking.id} size={190} backgroundColor="#ffffff" color="#090909" />
+                    <QRCode value={booking.qr ?? booking.id} size={qrSize} backgroundColor="#ffffff" color="#121316" />
                   </Pressable>
                   <Text variant="label" tone="muted">Code {code} · présentez ce QR à l’accueil</Text>
                   <Button size="sm" variant="ghost" label="Plein écran" icon={<Expand size={16} color={colors.brand.DEFAULT} />} onPress={() => setFull(true)} />
@@ -148,9 +151,9 @@ export default function BookingDetail() {
 
       {/* QR plein écran, fond blanc pour la lecture à l'accueil */}
       <Modal visible={full} animationType="fade" onRequestClose={() => setFull(false)}>
-        <View className="flex-1 items-center justify-center gap-6 bg-white p-8">
+        <View className="flex-1 items-center justify-center gap-6 bg-white p-6">
           <Text variant="title" className="text-background">{v.discipline.name} · {time(v.session.startsAt)}</Text>
-          <QRCode value={booking.qr ?? booking.id} size={280} backgroundColor="#ffffff" color="#090909" />
+          <QRCode value={booking.qr ?? booking.id} size={qrFull} backgroundColor="#ffffff" color="#121316" />
           <Text variant="label" className="text-background">Code {code} · luminosité au maximum conseillée</Text>
           <Pressable accessibilityRole="button" accessibilityLabel="Fermer" onPress={() => setFull(false)} className="mt-4 h-14 w-14 items-center justify-center rounded-full bg-background">
             <X size={24} color={colors.foreground.DEFAULT} />

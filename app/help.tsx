@@ -37,7 +37,7 @@ export default function Help() {
     <View className="flex-1 bg-background">
       <Header title="Aide et contact" />
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <View className="w-full max-w-xl self-center px-5">
+        <View className="w-full max-w-2xl self-center px-5">
           <SectionHeader title="Questions fréquentes" />
           <Card className="py-1">
             {FAQ.map((f, i) => <View key={f.q}>{i > 0 ? <Divider /> : null}<Faq q={f.q} a={f.a} /></View>)}

@@ -7,6 +7,7 @@ import { Avatar, Badge, Button, SectionHeader, Text, TokenAmount, colors } from 
 import { useDemo, useMyBookings } from '@/demo/DemoProvider';
 import { ClassCard, DisciplineArt } from '@/components/ClassVisuals';
 import { Appear, Tap } from '@/components/motion';
+import { Grid } from '@/components/Grid';
 import { disciplineStyle } from '@/lib/disciplines';
 import { dayLabel, dayLong, hoursUntil, sameDay, time } from '@/lib/format';
 
@@ -28,7 +29,7 @@ export default function Home() {
 
   return (
     <ScrollView className="flex-1 bg-background" contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
-      <View className="w-full max-w-xl self-center px-5">
+      <View className="w-full max-w-3xl self-center px-5">
         {/* En-tête */}
         <Appear>
           <View className="flex-row items-center justify-between">
@@ -59,8 +60,9 @@ export default function Home() {
             <Svg width="100%" height="100%" style={{ position: 'absolute' }}>
               <Defs>
                 <LinearGradient id="bal" x1="0" y1="0" x2="1" y2="1">
-                  <Stop offset="0" stopColor={colors.brand.DEFAULT} stopOpacity="0.35" />
-                  <Stop offset="0.6" stopColor={colors.surface.DEFAULT} stopOpacity="1" />
+                  <Stop offset="0" stopColor={colors.brand.DEFAULT} stopOpacity="0.55" />
+                  <Stop offset="0.55" stopColor={colors.surface.raised} stopOpacity="1" />
+                  <Stop offset="1" stopColor={colors.energy.DEFAULT} stopOpacity="0.35" />
                 </LinearGradient>
               </Defs>
               <Rect width="100%" height="100%" fill="url(#bal)" />
@@ -126,12 +128,12 @@ export default function Home() {
         {/* Bientôt au studio */}
         <Appear index={3}>
           <SectionHeader title={today.length ? 'Aujourd’hui au studio' : 'Bientôt au studio'} action="Planning" onAction={() => router.push('/(tabs)/planning')} />
-          <View className="gap-3">
-            {soon.slice(0, 3).map((s) => {
+          <Grid>
+            {soon.slice(0, 4).map((s) => {
               const v = view(s.id)!;
               return <ClassCard key={s.id} v={v} status={bookingFor(s.id)?.status} showDay={!today.length} onPress={() => router.push(`/class/${s.id}`)} />;
             })}
-          </View>
+          </Grid>
         </Appear>
 
         {/* Disciplines */}

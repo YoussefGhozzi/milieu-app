@@ -25,7 +25,7 @@ export function LaunchScreen({ onDone }: { onDone: () => void }) {
     >
       <Animated.View style={{ opacity: logo, transform: [{ scale }], alignItems: 'center' }}>
         <Text variant="display" tone="brand" className="text-[56px] leading-[64px]">mil!eu</Text>
-        <Text variant="overline" tone="muted" className="mt-2">{t('launch.tagline')}</Text>
+        <Text variant="overline" tone="success" className="mt-2">{t('launch.tagline')}</Text>
       </Animated.View>
     </Animated.View>
   );

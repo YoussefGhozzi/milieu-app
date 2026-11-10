@@ -90,7 +90,7 @@ export function ClassCard({ v, status, onPress, showDay }: { v: SessionView; sta
             <MapPin size={12} color={colors.foreground.subtle} />
             <Text variant="caption" tone="muted" numberOfLines={1}>{room.name}</Text>
           </View>
-          <View className="mt-1 flex-row items-center justify-between">
+          <View className="mt-1 flex-row flex-wrap items-center justify-between gap-2">
             {badge ? <Badge label={badge.label} tone={badge.tone} /> : <SeatsBadge booked={session.booked} capacity={session.capacity} />}
             <TokenAmount value={session.tokenCost} size="sm" />
           </View>

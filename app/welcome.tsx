@@ -9,6 +9,7 @@ import type { Lang } from '@milieu/contracts';
 import { Button, Chip, Text, colors } from '@milieu/ui';
 import { useDemo } from '@/demo/DemoProvider';
 import { setLanguage } from '@/i18n';
+import { useLayout } from '@/lib/layout';
 
 const SLIDES = [
   { icon: Coins, title: 'Un pack, des jetons', body: 'Achetez un pack de M Tokens une seule fois, puis utilisez-les pour tous vos cours. Sans abonnement.' },
@@ -27,6 +28,7 @@ export default function Welcome() {
   const insets = useSafeAreaInsets();
   const { i18n } = useTranslation();
   const { finishOnboarding } = useDemo();
+  const { isCompact } = useLayout();
   const [page, setPage] = useState(0);
   const scroller = useRef<ScrollView>(null);
   const slideWidth = Math.min(width, 640);
@@ -59,16 +61,16 @@ export default function Welcome() {
             const Icon = s.icon;
             return (
               <View key={s.title} style={{ width: slideWidth }} className="flex-1 justify-center px-8">
-                <Animated.View entering={FadeIn.delay(300 + i * 100).duration(600)} style={{ marginBottom: 40, alignItems: 'center' }}>
-                  <View className="h-40 w-40 items-center justify-center rounded-full border border-brand/30 bg-brand-soft">
-                    <View className="h-28 w-28 items-center justify-center rounded-full bg-brand/20">
-                      <Icon size={56} color={colors.brand.DEFAULT} strokeWidth={1.5} />
+                <Animated.View entering={FadeIn.delay(300 + i * 100).duration(600)} style={{ marginBottom: isCompact ? 20 : 40, alignItems: 'center' }}>
+                  <View className={isCompact ? 'h-28 w-28 items-center justify-center rounded-full border border-brand/30 bg-brand-soft' : 'h-40 w-40 items-center justify-center rounded-full border border-brand/30 bg-brand-soft'}>
+                    <View className={isCompact ? 'h-20 w-20 items-center justify-center rounded-full bg-energy-soft' : 'h-28 w-28 items-center justify-center rounded-full bg-energy-soft'}>
+                      <Icon size={isCompact ? 40 : 56} color={colors.brand.DEFAULT} strokeWidth={1.5} />
                     </View>
                   </View>
                 </Animated.View>
                 <Animated.View entering={FadeInDown.delay(450).duration(500)}>
                   <Text variant="overline" tone="brand" className="mb-3 text-center">{`0${i + 1} / 03`}</Text>
-                  <Text variant="display" className="text-center">{s.title}</Text>
+                  <Text variant={isCompact ? 'title' : 'display'} className="text-center">{s.title}</Text>
                   <Text tone="muted" className="mt-4 text-center leading-6">{s.body}</Text>
                 </Animated.View>
               </View>
