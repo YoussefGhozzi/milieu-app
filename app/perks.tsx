@@ -51,15 +51,15 @@ export default function Perks() {
             <View className="rounded-xl bg-brand p-5">
               <View className="flex-row items-center justify-between">
                 <View>
-                  <Text variant="overline" className="text-black">Votre niveau</Text>
-                  <Text variant="display" className="text-black">{level.name}</Text>
+                  <Text variant="overline" className="text-brand-foreground">Votre niveau</Text>
+                  <Text variant="display" className="text-brand-foreground">{level.name}</Text>
                 </View>
-                <View className="h-14 w-14 items-center justify-center rounded-full bg-black"><Crown size={26} color={colors.energy.DEFAULT} /></View>
+                <View className="h-14 w-14 items-center justify-center rounded-full bg-black"><Crown size={26} color="#FACC15" /></View>
               </View>
               <View className="mt-4 h-2 overflow-hidden rounded-full bg-black/20">
-                <View style={{ width: `${Math.round(progress * 100)}%` }} className="h-2 rounded-full bg-black" />
+                <View style={{ width: `${Math.round(progress * 100)}%` }} className="h-2 rounded-full bg-brand-foreground" />
               </View>
-              <Text variant="label" className="mt-2 font-semibold text-black">
+              <Text variant="label" className="mt-2 font-semibold text-brand-foreground">
                 {next ? `${TOTAL_SESSIONS} séances · encore ${next.from - TOTAL_SESSIONS} pour devenir ${next.name}` : `${TOTAL_SESSIONS} séances · niveau maximum`}
               </Text>
             </View>
@@ -93,7 +93,7 @@ export default function Perks() {
                   return (
                     <Animated.View key={i} entering={ZoomIn.delay(300 + i * 60).springify()} style={{ width: '18%', aspectRatio: 1 }}>
                       <View className={cn('flex-1 items-center justify-center rounded-full border-2', done ? 'border-energy bg-energy' : i === 9 ? 'border-dashed border-brand' : 'border-dashed border-border-strong')}>
-                        {done ? <Check size={20} color="#000" strokeWidth={3} /> : i === 9 ? <Coffee size={20} color={colors.brand.DEFAULT} /> : <Text variant="label" tone="subtle">{i + 1}</Text>}
+                        {done ? <Check size={20} color={colors.energy.foreground} strokeWidth={3} /> : i === 9 ? <Coffee size={20} color={colors.brand.DEFAULT} /> : <Text variant="label" tone="subtle">{i + 1}</Text>}
                       </View>
                     </Animated.View>
                   );
@@ -167,7 +167,7 @@ export default function Perks() {
               </View>
               <View className="flex-row gap-3">
                 <Button className="flex-1" variant="secondary" label="Copier" icon={<Copy size={16} color={colors.foreground.DEFAULT} />} onPress={() => toast('Code copié')} />
-                <Button className="flex-1" label="Partager" icon={<Share2 size={16} color="#000" />} onPress={() => toast('Lien de parrainage prêt à partager', 'info')} />
+                <Button className="flex-1" label="Partager" icon={<Share2 size={16} color={colors.brand.foreground} />} onPress={() => toast('Lien de parrainage prêt à partager', 'info')} />
               </View>
               <Divider />
               <View className="flex-row items-center gap-2">

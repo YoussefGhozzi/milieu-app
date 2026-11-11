@@ -3,7 +3,7 @@ import { Pressable, TextInput, View, type TextInputProps } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react-native';
-import { Text, cn, colors } from '@milieu/ui';
+import { Text, cn, colors, translate } from '@milieu/ui';
 
 /** En-tête d'écran secondaire : bouton retour, titre, action à droite. */
 export function Header({ title, right, onBack, transparent }: { title?: string; right?: ReactNode; onBack?: () => void; transparent?: boolean }) {
@@ -51,6 +51,7 @@ export function TextField({ label, error, hint, secure, icon, ...props }: TextIn
           onBlur={(e) => { setFocused(false); props.onBlur?.(e); }}
           style={{ flex: 1, color: colors.foreground.DEFAULT, fontSize: 16, height: '100%', outlineStyle: 'none' } as never}
           {...props}
+          placeholder={props.placeholder ? translate(props.placeholder) : undefined}
         />
         {secure ? (
           <Pressable accessibilityRole="button" accessibilityLabel={hidden ? 'Afficher le mot de passe' : 'Masquer le mot de passe'} hitSlop={10} onPress={() => setHidden(!hidden)}>

@@ -2,21 +2,23 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
-import { Bell, ChevronRight, Coffee, Hourglass, Plus, QrCode, Wallet } from 'lucide-react-native';
+import { Bell, ChevronRight, Coffee, Hourglass, Moon, Plus, QrCode, Sun, Wallet } from 'lucide-react-native';
 import { Avatar, Badge, Button, SectionHeader, Text, TokenAmount, colors } from '@milieu/ui';
 import { useDemo, useMyBookings } from '@/demo/DemoProvider';
 import { ClassCard, DisciplineArt } from '@/components/ClassVisuals';
 import { Appear, Tap } from '@/components/motion';
 import { Grid } from '@/components/Grid';
 import { Logo } from '@/components/Logo';
+import { useAppTheme } from '@/theme/AppTheme';
 import { disciplineStyle } from '@/lib/disciplines';
-import { dayLabel, dayLong, hoursUntil, sameDay, time } from '@/lib/format';
+import { dayLabel, dayLong, hoursUntil, locale, sameDay, time } from '@/lib/format';
 
 /** A06 — Accueil : solde, prochain cours avec QR, cours du jour, disciplines. */
 export default function Home() {
   const insets = useSafeAreaInsets();
   const { state, studio, balance, unread, view, bookingFor } = useDemo();
   const { upcoming } = useMyBookings();
+  const { mode, toggle } = useAppTheme();
   const next = upcoming.find((r) => r.booking.status === 'booked');
   const waiting = upcoming.filter((r) => r.booking.status === 'waitlist');
   const now = new Date();
@@ -35,7 +37,13 @@ export default function Home() {
         <Appear>
           <View className="flex-row items-center justify-between">
             <View>
-              <View className="mb-3"><Logo height={20} /></View>
+              <View className="mb-3 flex-row items-center gap-3">
+                <Logo height={20} />
+                <Pressable accessibilityRole="button" accessibilityLabel={mode === 'dark' ? 'Passer en mode jour' : 'Passer en mode nuit'} onPress={toggle} hitSlop={10}
+                  className="h-8 w-8 items-center justify-center rounded-full border border-border bg-surface">
+                  {mode === 'dark' ? <Sun size={16} color={colors.warning.DEFAULT} /> : <Moon size={16} color={colors.info.DEFAULT} />}
+                </Pressable>
+              </View>
               <Text variant="caption" tone="muted" className="capitalize">{dayLong(now)}</Text>
               <Text variant="title">Bonjour {state.member.firstName}</Text>
             </View>
@@ -77,7 +85,7 @@ export default function Home() {
               </View>
               <View className="mt-3 flex-row flex-wrap gap-2">
                 <Badge label={`${state.wallet.purchased} achetés`} />
-                {bonus ? <Badge tone="brand" label={`${bonus.amount} bonus · jusqu’au ${new Date(bonus.expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`} /> : null}
+                {bonus ? <Badge tone="brand" label={`${bonus.amount} bonus · jusqu’au ${new Date(bonus.expiresAt).toLocaleDateString(locale(), { day: 'numeric', month: 'short' })}`} /> : null}
               </View>
               <View className="mt-5 flex-row gap-3">
                 <Button className="flex-1" label="Recharger" icon={<Plus size={18} color={colors.brand.foreground} />} onPress={() => router.push('/shop')} />
@@ -166,12 +174,12 @@ export default function Home() {
         <Appear index={5}>
           <Tap onPress={() => router.push('/perks')} accessibilityLabel="MILIEU Perks : 7 séances sur 10, un café offert disponible">
             <View className="mt-6 flex-row items-center gap-4 rounded-xl bg-energy p-5">
-              <View className="h-12 w-12 items-center justify-center rounded-full bg-black/10"><Coffee size={24} color="#000" /></View>
+              <View className="h-12 w-12 items-center justify-center rounded-full bg-black/10"><Coffee size={24} color={colors.energy.foreground} /></View>
               <View className="flex-1">
-                <Text variant="overline" className="text-black">MILIEU Perks</Text>
-                <Text variant="heading" className="font-bold text-black">7 / 10 séances · 1 café offert</Text>
+                <Text variant="overline" className="text-energy-foreground">MILIEU Perks</Text>
+                <Text variant="heading" className="font-bold text-energy-foreground">7 / 10 séances · 1 café offert</Text>
               </View>
-              <ChevronRight size={22} color="#000" />
+              <ChevronRight size={22} color={colors.energy.foreground} />
             </View>
           </Tap>
         </Appear>

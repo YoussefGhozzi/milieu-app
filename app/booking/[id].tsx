@@ -152,11 +152,11 @@ export default function BookingDetail() {
       {/* QR plein écran, fond blanc pour la lecture à l'accueil */}
       <Modal visible={full} animationType="fade" onRequestClose={() => setFull(false)}>
         <View className="flex-1 items-center justify-center gap-6 bg-white p-6">
-          <Text variant="title" className="text-background">{v.discipline.name} · {time(v.session.startsAt)}</Text>
+          <Text variant="title" className="text-black">{v.discipline.name} · {time(v.session.startsAt)}</Text>
           <QRCode value={booking.qr ?? booking.id} size={qrFull} backgroundColor="#ffffff" color="#121316" />
-          <Text variant="label" className="text-background">Code {code} · luminosité au maximum conseillée</Text>
-          <Pressable accessibilityRole="button" accessibilityLabel="Fermer" onPress={() => setFull(false)} className="mt-4 h-14 w-14 items-center justify-center rounded-full bg-background">
-            <X size={24} color={colors.foreground.DEFAULT} />
+          <Text variant="label" className="text-black">Code {code} · luminosité au maximum conseillée</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Fermer" onPress={() => setFull(false)} className="mt-4 h-14 w-14 items-center justify-center rounded-full bg-black">
+            <X size={24} color="#ffffff" />
           </Pressable>
         </View>
       </Modal>

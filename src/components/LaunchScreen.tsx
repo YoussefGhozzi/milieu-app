@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text as RNText } from 'react-native';
-import { colors } from '@milieu/ui';
 import { Logo, TAGLINE } from './Logo';
 
 /** A01 — Lancement aux couleurs de la marque : logo noir sur orange, puis fondu vers l'app. */
@@ -18,7 +17,7 @@ export function LaunchScreen({ onDone }: { onDone: () => void }) {
 
   const scale = logo.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] });
   return (
-    <Animated.View accessibilityLabel="MILIEU" style={[StyleSheet.absoluteFill, { backgroundColor: colors.brand.DEFAULT, alignItems: 'center', justifyContent: 'center', opacity }]}>
+    <Animated.View accessibilityLabel="MILIEU" style={[StyleSheet.absoluteFill, { backgroundColor: '#FF6B1A', alignItems: 'center', justifyContent: 'center', opacity }]}>
       <Animated.View style={{ opacity: logo, transform: [{ scale }], alignItems: 'center', gap: 18 }}>
         <Logo kind="mark" tone="dark" height={84} />
         <Logo kind="wordmark" tone="dark" height={34} />

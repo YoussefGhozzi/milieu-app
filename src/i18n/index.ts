@@ -6,9 +6,15 @@ import type { Lang } from '@milieu/contracts';
 import { fr } from './fr';
 import { en } from './en';
 import { ar } from './ar';
+import { setTranslator } from '@milieu/ui';
+import { translateText } from './translate';
 
 const SUPPORTED: Lang[] = ['fr', 'en', 'ar'];
-const deviceLang = getLocales()[0]?.languageCode as Lang | undefined;
+const LANG_KEY = 'milieu.lang';
+const storedLang = (): Lang | undefined => {
+  try { return Platform.OS === 'web' ? (localStorage.getItem(LANG_KEY) as Lang | null) ?? undefined : undefined; } catch { return undefined; }
+};
+const deviceLang = storedLang() ?? (getLocales()[0]?.languageCode as Lang | undefined);
 
 i18n.use(initReactI18next).init({
   resources: { fr: { translation: fr }, en: { translation: en }, ar: { translation: ar } },
@@ -17,6 +23,12 @@ i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
   returnNull: false,
 });
+
+setTranslator(translateText);
+if (Platform.OS === 'web' && typeof document !== 'undefined') {
+  document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = i18n.language;
+}
 
 export const isRTL = (lang: string) => lang === 'ar';
 
@@ -27,6 +39,7 @@ export const isRTL = (lang: string) => lang === 'ar';
  */
 export function setLanguage(lang: Lang): boolean {
   i18n.changeLanguage(lang);
+  try { if (Platform.OS === 'web') localStorage.setItem(LANG_KEY, lang); } catch { /* ignore */ }
   const rtl = isRTL(lang);
   if (Platform.OS === 'web') {
     if (typeof document !== 'undefined') {

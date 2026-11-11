@@ -9,7 +9,7 @@ import { useDemo } from '@/demo/DemoProvider';
 import { ClassCard } from '@/components/ClassVisuals';
 import { Tap } from '@/components/motion';
 import { Grid } from '@/components/Grid';
-import { addDays, dayShort, sameDay, startOfDay } from '@/lib/format';
+import { addDays, dayShort, locale, sameDay, startOfDay } from '@/lib/format';
 
 function LiveDot() {
   const o = useSharedValue(1);
@@ -55,7 +55,7 @@ export default function Planning() {
         {days.map((d, i) => {
           const active = i === day;
           return (
-            <Tap key={d.toISOString()} onPress={() => setDay(i)} accessibilityLabel={d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} accessibilityState={{ selected: active }}>
+            <Tap key={d.toISOString()} onPress={() => setDay(i)} accessibilityLabel={d.toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' })} accessibilityState={{ selected: active }}>
               <View className={cn('h-[72px] w-14 items-center justify-center gap-1 rounded-lg border', active ? 'border-brand bg-brand' : 'border-border bg-surface')}>
                 <Text variant="caption" tone={active ? 'onBrand' : 'muted'} className="capitalize">{i === 0 ? 'Auj.' : dayShort(d)}</Text>
                 <Text variant="heading" tone={active ? 'onBrand' : 'default'} className="font-bold">{d.getDate()}</Text>
@@ -81,7 +81,7 @@ export default function Planning() {
 
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
         <View className="w-full max-w-3xl gap-3 self-center px-5 pt-2">
-          <Text variant="caption" tone="muted">{list.length} cours · {days[day].toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</Text>
+          <Text variant="caption" tone="muted">{list.length} cours · {days[day].toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' })}</Text>
           {list.length === 0 ? (
             <EmptyState icon={<CalendarX2 size={28} color={colors.foreground.muted} />} title="Aucun cours"
               body="Aucun cours ne correspond à ces filtres ce jour-là. Essayez un autre jour ou une autre discipline." />

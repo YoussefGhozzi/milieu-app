@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Thème nuit par défaut ; l'app remplace ces variables quand on passe en mode jour. */
+:root {
+  --c-brand: 255 107 26; --c-brandForeground: 18 19 22; --c-brandStrong: 255 138 69;
+  --c-energy: 34 197 94; --c-energyForeground: 18 19 22;
+  --c-background: 18 19 22; --c-surface: 27 29 33; --c-surfaceRaised: 37 40 45; --c-surfaceSunken: 22 24 27;
+  --c-border: 46 50 56; --c-borderStrong: 66 71 80;
+  --c-foreground: 250 250 250; --c-muted: 182 187 195; --c-subtle: 140 146 155;
+  --c-success: 34 197 94; --c-warning: 251 191 36; --c-danger: 248 113 113; --c-info: 96 165 250;
+}

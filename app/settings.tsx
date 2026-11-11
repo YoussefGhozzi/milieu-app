@@ -9,6 +9,7 @@ import { useDemo } from '@/demo/DemoProvider';
 import { Header } from '@/components/Chrome';
 import { useToast } from '@/components/Toast';
 import { setLanguage } from '@/i18n';
+import { useAppTheme } from '@/theme/AppTheme';
 
 function ToggleRow({ title, subtitle, value, onChange }: { title: string; subtitle: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -28,6 +29,7 @@ export default function SettingsScreen() {
   const { i18n } = useTranslation();
   const toast = useToast();
   const { resetDemo } = useDemo();
+  const { mode, setMode } = useAppTheme();
   const [prefs, setPrefs] = useState({ reminders: true, waitlist: true, offers: false, marketing: false, analytics: true });
   const [del, setDel] = useState(false);
   const set = (k: keyof typeof prefs) => (v: boolean) => setPrefs({ ...prefs, [k]: v });
@@ -41,10 +43,15 @@ export default function SettingsScreen() {
           <View className="flex-row gap-2">
             {([['fr', 'Français'], ['en', 'English'], ['ar', 'العربية']] as [Lang, string][]).map(([l, label]) => (
               <Chip key={l} label={label} selected={i18n.language === l}
-                onPress={() => { const restart = setLanguage(l); toast(restart ? 'Redémarrez l’app pour appliquer l’arabe' : 'Langue modifiée', 'info'); }} />
+                onPress={() => { const restart = setLanguage(l); if (restart) toast('Redémarrez l’app pour appliquer l’arabe', 'info'); }} />
             ))}
           </View>
-          <Text variant="caption" tone="subtle" className="mt-2">La traduction complète en anglais et en arabe arrive avec la version finale.</Text>
+
+          <SectionHeader title="Apparence" />
+          <View className="flex-row gap-2">
+            <Chip label="Mode nuit" selected={mode === 'dark'} onPress={() => setMode('dark')} />
+            <Chip label="Mode jour" selected={mode === 'light'} onPress={() => setMode('light')} />
+          </View>
 
           <SectionHeader title="Notifications" />
           <Card className="py-1">

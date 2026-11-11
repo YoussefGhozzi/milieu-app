@@ -6,6 +6,7 @@ import { Avatar, Badge, Card, Divider, ListRow, Text, colors } from '@milieu/ui'
 import { useDemo } from '@/demo/DemoProvider';
 import { Appear } from '@/components/motion';
 import { useToast } from '@/components/Toast';
+import { locale } from '@/lib/format';
 
 /** A22 — Profil : identité, statistiques, accès aux réglages, à l'aide et à la déconnexion. */
 export default function Profile() {
@@ -14,7 +15,7 @@ export default function Profile() {
   const { state, balance, unread, logout, resetDemo } = useDemo();
   const attended = state.bookings.filter((b) => b.status === 'attended').length;
   const upcoming = state.bookings.filter((b) => b.status === 'booked').length;
-  const since = new Date(state.member.memberSince).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const since = new Date(state.member.memberSince).toLocaleDateString(locale(), { month: 'long', year: 'numeric' });
 
   const stats = [
     { label: 'Cours suivis', value: attended },
