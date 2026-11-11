@@ -18,7 +18,7 @@ export default function Wallet() {
   const buckets = [
     { icon: ShoppingBag, color: colors.foreground.DEFAULT, label: 'Jetons achetés', value: state.wallet.purchased, note: 'N’expirent jamais' },
     { icon: Clock3, color: colors.brand.DEFAULT, label: 'Jetons bonus', value: bonusTotal, note: firstExpiry ? `Expirent dans ${daysLeft} jours · utilisés en premier` : 'Aucun bonus en cours' },
-    { icon: Gift, color: colors.success.DEFAULT, label: 'Récompenses', value: state.wallet.reward, note: 'Bientôt : MILIEU Perks' },
+    { icon: Gift, color: colors.success.DEFAULT, label: 'Récompenses', value: state.wallet.reward, note: 'Crédits café : voir MILIEU Perks' },
   ];
 
   return (

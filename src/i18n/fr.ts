@@ -1,7 +1,7 @@
 // Français : langue de référence. Chaque clé ajoutée ici doit exister en anglais et en arabe.
 export const fr = {
   common: { tokens: 'jetons', token: 'jeton', soon: 'Bientôt dans la démo', back: 'Retour', close: 'Fermer', confirm: 'Confirmer', cancel: 'Annuler' },
-  tabs: { home: 'Accueil', planning: 'Planning', bookings: 'Réservations', wallet: 'Portefeuille', profile: 'Profil' },
+  tabs: { home: 'Accueil', planning: 'Réserver', bookings: 'Réservations', wallet: 'M Tokens', profile: 'Profil' },
   launch: { tagline: 'Move. Recover. Belong.' },
   placeholder: {
     planning: 'Le planning de la semaine arrive mercredi.',

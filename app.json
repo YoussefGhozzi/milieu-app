@@ -6,7 +6,7 @@
     "version": "0.1.0",
     "orientation": "default",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#121316",
+    "backgroundColor": "#0A0A0A",
     "ios": {
       "bundleIdentifier": "tn.milieu.app",
       "supportsTablet": true
@@ -19,7 +19,7 @@
       "bundler": "metro",
       "output": "single",
       "name": "MILIEU",
-      "themeColor": "#121316"
+      "themeColor": "#FF3C00"
     },
     "plugins": [
       "expo-router",

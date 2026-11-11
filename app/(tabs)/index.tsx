@@ -2,12 +2,13 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
-import { Bell, ChevronRight, Hourglass, Plus, QrCode, Wallet } from 'lucide-react-native';
+import { Bell, ChevronRight, Coffee, Hourglass, Plus, QrCode, Wallet } from 'lucide-react-native';
 import { Avatar, Badge, Button, SectionHeader, Text, TokenAmount, colors } from '@milieu/ui';
 import { useDemo, useMyBookings } from '@/demo/DemoProvider';
 import { ClassCard, DisciplineArt } from '@/components/ClassVisuals';
 import { Appear, Tap } from '@/components/motion';
 import { Grid } from '@/components/Grid';
+import { Logo } from '@/components/Logo';
 import { disciplineStyle } from '@/lib/disciplines';
 import { dayLabel, dayLong, hoursUntil, sameDay, time } from '@/lib/format';
 
@@ -34,6 +35,7 @@ export default function Home() {
         <Appear>
           <View className="flex-row items-center justify-between">
             <View>
+              <View className="mb-3"><Logo height={20} /></View>
               <Text variant="caption" tone="muted" className="capitalize">{dayLong(now)}</Text>
               <Text variant="title">Bonjour {state.member.firstName}</Text>
             </View>
@@ -158,6 +160,20 @@ export default function Home() {
               );
             })}
           </ScrollView>
+        </Appear>
+
+        {/* MILIEU Perks */}
+        <Appear index={5}>
+          <Tap onPress={() => router.push('/perks')} accessibilityLabel="MILIEU Perks : 7 séances sur 10, un café offert disponible">
+            <View className="mt-6 flex-row items-center gap-4 rounded-xl bg-energy p-5">
+              <View className="h-12 w-12 items-center justify-center rounded-full bg-black/10"><Coffee size={24} color="#000" /></View>
+              <View className="flex-1">
+                <Text variant="overline" className="text-black">MILIEU Perks</Text>
+                <Text variant="heading" className="font-bold text-black">7 / 10 séances · 1 café offert</Text>
+              </View>
+              <ChevronRight size={22} color="#000" />
+            </View>
+          </Tap>
         </Appear>
 
         {/* Offre */}

@@ -32,7 +32,7 @@ export default function Profile() {
               <Text variant="title">{state.member.firstName} {state.member.lastName}</Text>
               <Text variant="label" tone="muted">Membre depuis {since}</Text>
             </View>
-            <Badge tone="brand" label="First Timer · MILIEU Perks bientôt" />
+            <Badge tone="success" label="Niveau Regular · MILIEU Perks" />
           </View>
         </Appear>
 
@@ -60,10 +60,9 @@ export default function Profile() {
         </Appear>
 
         <Appear index={3}>
-          <View className="mt-4 flex-row items-center gap-3 rounded-lg border border-dashed border-brand/40 p-4">
-            <Sparkles size={18} color={colors.brand.DEFAULT} />
-            <Text variant="label" tone="muted" className="flex-1">Bientôt : niveaux, séries de semaines actives et récompenses café avec MILIEU Perks.</Text>
-          </View>
+          <Card className="mt-4 py-1">
+            <ListRow icon={<Sparkles size={18} color={colors.energy.DEFAULT} />} title="MILIEU Perks" subtitle="Niveaux, série, café offert, parrainage" onPress={() => router.push('/perks')} />
+          </Card>
         </Appear>
 
         <Appear index={4}>

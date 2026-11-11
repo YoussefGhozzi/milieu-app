@@ -1,4 +1,4 @@
-const { colors, radius, fontSize } = require('@milieu/ui/tokens');
+const { colors, radius, fontSize, fontFamily } = require('@milieu/ui/tokens');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -10,6 +10,6 @@ module.exports = {
   presets: [require('nativewind/preset')],
   // Thème sombre fixe : le mode sombre ne suit pas le réglage du système (sinon erreur NativeWind sur le web).
   darkMode: 'class',
-  theme: { extend: { colors, borderRadius: radius, fontSize } },
+  theme: { extend: { colors, borderRadius: radius, fontSize, fontFamily } },
   plugins: [],
 };

@@ -1,6 +1,7 @@
 import '../global.css';
 import '@/i18n';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
@@ -17,6 +18,15 @@ const theme = {
 export default function RootLayout() {
   const [launched, setLaunched] = useState(false);
   const done = useCallback(() => setLaunched(true), []);
+  // Polices de la marque (web) : Archivo Black pour les titres, Montserrat pour le texte.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || document.getElementById('milieu-fonts')) return;
+    const link = document.createElement('link');
+    link.id = 'milieu-fonts';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@400;500;600;700&display=swap';
+    document.head.appendChild(link);
+  }, []);
   return (
     <ThemeProvider value={theme}>
       <DemoProvider>

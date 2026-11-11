@@ -2,7 +2,7 @@ import type { Dict } from './fr';
 
 export const en: Dict = {
   common: { tokens: 'tokens', token: 'token', soon: 'Coming soon in the demo', back: 'Back', close: 'Close', confirm: 'Confirm', cancel: 'Cancel' },
-  tabs: { home: 'Home', planning: 'Schedule', bookings: 'Bookings', wallet: 'Wallet', profile: 'Profile' },
+  tabs: { home: 'Home', planning: 'Book', bookings: 'Bookings', wallet: 'M Tokens', profile: 'Profile' },
   launch: { tagline: 'Move. Recover. Belong.' },
   placeholder: {
     planning: 'The weekly schedule lands on Wednesday.',

@@ -2,10 +2,10 @@ import { Activity, Flame, Infinity as InfinityIcon, Wind, Zap, type LucideIcon }
 
 /** Identité visuelle de chaque discipline : couleur d'accent et icône (aucune photo dans la démo). */
 export const DISCIPLINE_STYLE: Record<string, { color: string; icon: LucideIcon; mood: string }> = {
-  lagree: { color: '#FF6B1A', icon: Activity, mood: 'Lent. Intense. Précis.' },
+  lagree: { color: '#FF3C00', icon: Activity, mood: 'Lent. Intense. Précis.' },
   'hot-sculpt': { color: '#FF4D6A', icon: Flame, mood: 'Chaleur et énergie' },
   'mat-pilates': { color: '#A78BFA', icon: InfinityIcon, mood: 'Gainage et contrôle' },
-  mobility: { color: '#22C55E', icon: Wind, mood: 'Respirer, s’étirer, récupérer' },
+  mobility: { color: '#D9E650', icon: Wind, mood: 'Respirer, s’étirer, récupérer' },
   functional: { color: '#38BDF8', icon: Zap, mood: 'Force et circuits' },
 };
 

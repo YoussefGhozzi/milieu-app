@@ -3,7 +3,7 @@ import type { Dict } from './fr';
 // Arabe : affiché de droite à gauche (RTL). Textes à faire relire par un locuteur avant la mise en production.
 export const ar: Dict = {
   common: { tokens: 'رموز', token: 'رمز', soon: 'قريبًا في العرض التجريبي', back: 'رجوع', close: 'إغلاق', confirm: 'تأكيد', cancel: 'إلغاء' },
-  tabs: { home: 'الرئيسية', planning: 'الجدول', bookings: 'حجوزاتي', wallet: 'المحفظة', profile: 'الملف الشخصي' },
+  tabs: { home: 'الرئيسية', planning: 'احجز', bookings: 'حجوزاتي', wallet: 'M Tokens', profile: 'الملف الشخصي' },
   launch: { tagline: 'Move. Recover. Belong.' },
   placeholder: {
     planning: 'جدول الأسبوع يصل يوم الأربعاء.',

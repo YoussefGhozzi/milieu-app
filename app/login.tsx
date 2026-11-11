@@ -7,6 +7,7 @@ import { BottomBar, TextField } from '@/components/Chrome';
 import { Appear } from '@/components/motion';
 import { useToast } from '@/components/Toast';
 import { useDemo } from '@/demo/DemoProvider';
+import { Logo } from '@/components/Logo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /** A04 — Connexion (e-mail ou téléphone). Un raccourci remplit le compte de démo. */
@@ -31,7 +32,7 @@ export default function Login() {
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingTop: insets.top + 48, paddingBottom: 24 }}>
         <View className="w-full max-w-xl gap-5 self-center px-5">
           <Appear>
-            <Text variant="title" tone="brand" className="font-bold">mil!eu</Text>
+            <Logo height={30} />
             <Text variant="display" className="mt-8">Bon retour</Text>
             <Text tone="muted" className="mt-2">Connectez-vous pour réserver vos cours.</Text>
           </Appear>

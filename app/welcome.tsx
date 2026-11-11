@@ -10,6 +10,7 @@ import { Button, Chip, Text, colors } from '@milieu/ui';
 import { useDemo } from '@/demo/DemoProvider';
 import { setLanguage } from '@/i18n';
 import { useLayout } from '@/lib/layout';
+import { Logo } from '@/components/Logo';
 
 const SLIDES = [
   { icon: Coins, title: 'Un pack, des jetons', body: 'Achetez un pack de M Tokens une seule fois, puis utilisez-les pour tous vos cours. Sans abonnement.' },
@@ -43,7 +44,7 @@ export default function Welcome() {
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top + 12, paddingBottom: Math.max(insets.bottom, 16) + 8 }}>
       <View className="flex-row items-center justify-between px-5">
-        <Text variant="title" tone="brand" className="font-bold">mil!eu</Text>
+        <Logo height={26} />
         <View className="flex-row gap-2">
           {(['fr', 'en', 'ar'] as Lang[]).map((l) => (
             <Chip key={l} label={l.toUpperCase()} selected={i18n.language === l} onPress={() => setLanguage(l)} />
