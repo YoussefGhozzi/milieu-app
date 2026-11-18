@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { Lock, Mail, Sparkles } from 'lucide-react-native';
+import { Briefcase, Lock, Mail, Sparkles } from 'lucide-react-native';
 import { Button, Text, colors } from '@milieu/ui';
 import { BottomBar, TextField } from '@/components/Chrome';
 import { Appear } from '@/components/motion';
@@ -62,6 +62,10 @@ export default function Login() {
       <BottomBar>
         <Button block size="lg" label="Se connecter" loading={busy} onPress={submit} />
         <Button block variant="ghost" className="mt-1" label="Créer un compte" onPress={() => router.replace('/register')} />
+        <Pressable accessibilityRole="link" onPress={() => router.push('/pro')} className="mt-1 flex-row items-center justify-center gap-2 py-2" hitSlop={8}>
+          <Briefcase size={14} color={colors.foreground.muted} />
+          <Text variant="label" tone="muted">Coach, accueil ou admin ? <Text variant="label" tone="brand" className="font-semibold">Espace professionnel</Text></Text>
+        </Pressable>
       </BottomBar>
     </KeyboardAvoidingView>
   );

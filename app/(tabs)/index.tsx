@@ -8,6 +8,7 @@ import { useDemo, useMyBookings } from '@/demo/DemoProvider';
 import { ClassCard, DisciplineArt } from '@/components/ClassVisuals';
 import { Appear, Tap } from '@/components/motion';
 import { Grid } from '@/components/Grid';
+import { GymPromos } from '@/components/GymPromos';
 import { Logo } from '@/components/Logo';
 import { useAppTheme } from '@/theme/AppTheme';
 import { disciplineStyle } from '@/lib/disciplines';
@@ -94,6 +95,9 @@ export default function Home() {
             </View>
           </View>
         </Appear>
+
+        {/* À l'affiche : cours des coachs validés par l'accueil de la salle (réseau multi-salles) */}
+        <GymPromos />
 
         {/* Prochain cours */}
         <Appear index={2}>

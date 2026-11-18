@@ -25,7 +25,13 @@
       "expo-router",
       "expo-localization",
       "expo-status-bar",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "MILIEU utilise la caméra pour scanner les tickets QR des clients à l’entrée des cours."
+        }
+      ]
     ],
     "extra": {
       "supportsRTL": true
