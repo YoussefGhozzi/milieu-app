@@ -1,5 +1,6 @@
 import '../global.css';
 import '@/i18n';
+import '@/lib/interop';
 import { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import { Stack } from 'expo-router';
@@ -7,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { colors } from '@milieu/ui';
 import { DemoProvider } from '@/demo/DemoProvider';
+import { NetworkProvider } from '@/backend/NetworkProvider';
 import { LaunchScreen } from '@/components/LaunchScreen';
 import { ToastProvider } from '@/components/Toast';
 import { AppThemeProvider, useAppTheme } from '@/theme/AppTheme';
@@ -44,8 +46,10 @@ export default function RootLayout() {
   }, []);
   return (
     <DemoProvider>
-      <AppThemeProvider><Shell /></AppThemeProvider>
-      {!launched && <LaunchScreen onDone={done} />}
+      <NetworkProvider>
+        <AppThemeProvider><Shell /></AppThemeProvider>
+        {!launched && <LaunchScreen onDone={done} />}
+      </NetworkProvider>
     </DemoProvider>
   );
 }
