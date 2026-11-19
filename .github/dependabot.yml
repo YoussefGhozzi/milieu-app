@@ -1,0 +1,22 @@
+# Mises à jour automatiques, groupées pour limiter le bruit.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    groups:
+      expo:
+        patterns: ["expo", "expo-*", "@expo/*", "react-native", "react-native-*", "react", "react-dom"]
+      dev:
+        dependency-type: development
+    ignore:
+      # Les montées de version majeure d'Expo / React Native se font ensemble, à la main (npx expo install --fix).
+      - dependency-name: "expo"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
