@@ -1,6 +1,22 @@
 import type {
   Account, Course, Gym, NetworkDb, NetworkNotification, Promotion, Rating, Recurrence, Role, Ticket, TokenMove,
 } from '@milieu/contracts';
+import {
+  aggregateRatings, cancellationPolicy, canRateTicket, checkInTiming, fullName, generateTicketCode, isNoShowDue, METHOD_LABEL,
+  occurrences, overlaps, promoLabel, promoState, quoteRecharge as quoteFromPromotions, RECURRENCE_LABEL, sessionKey, TAKES_SEAT,
+  formatTnd, type CoachRating, type RechargeQuote,
+} from '@milieu/contracts';
+
+/*
+ * Les règles pures (récurrences, fenêtre de scan, annulation, absences, devis, évaluations) vivent dans
+ * `@milieu/contracts` (dossier domain/) : l'app et l'API appliquent exactement les mêmes. Elles sont réexportées
+ * ici pour que les écrans continuent d'importer depuis ce fichier.
+ */
+export {
+  CHECKIN_AFTER_H, CHECKIN_BEFORE_H, DEFAULT_SPAN, formatTnd, fullName, lastDay, METHOD_LABEL, nthOccurrence, occurrenceCount,
+  occurrences, promoLabel, promoState, RECURRENCE_LABEL, sessionKey,
+} from '@milieu/contracts';
+export type { CoachRating, PromoState, RechargeQuote } from '@milieu/contracts';
 
 /*
  * « Backend » local du réseau MILIEU : toutes les règles métier du workflow
@@ -19,58 +35,6 @@ const nowIso = () => new Date().toISOString();
 /* Séances : un cours validé se répète selon sa récurrence             */
 /* ------------------------------------------------------------------ */
 
-const DEFAULT_SPAN: Record<Recurrence, { months?: number; years?: number; weeks?: number }> = {
-  once: {},
-  weekly: { weeks: 26 },
-  monthly: { months: 12 },
-  yearly: { years: 3 },
-};
-
-/** n-ième occurrence d'un cours (heure locale conservée ; un 31 sans 31 → dernier jour du mois). */
-export function nthOccurrence(first: Date, recurrence: Recurrence, n: number): Date {
-  const d = new Date(first);
-  if (recurrence === 'weekly') d.setDate(d.getDate() + 7 * n);
-  if (recurrence === 'monthly' || recurrence === 'yearly') {
-    const months = recurrence === 'monthly' ? n : 12 * n;
-    const day = first.getDate();
-    d.setDate(1);
-    d.setMonth(first.getMonth() + months);
-    const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-    d.setDate(Math.min(day, last));
-  }
-  return d;
-}
-
-export function lastDay(course: Pick<Course, 'startsAt' | 'recurrence' | 'until'>): Date {
-  const first = new Date(course.startsAt);
-  if (course.recurrence === 'once') return first;
-  if (course.until) return new Date(`${course.until}T23:59:59`);
-  const s = DEFAULT_SPAN[course.recurrence];
-  const d = new Date(first);
-  if (s.weeks) d.setDate(d.getDate() + 7 * s.weeks);
-  if (s.months) d.setMonth(d.getMonth() + s.months);
-  if (s.years) d.setFullYear(d.getFullYear() + s.years);
-  return d;
-}
-
-/** Débuts des séances d'un cours qui chevauchent [from, to]. */
-export function occurrences(course: Pick<Course, 'startsAt' | 'recurrence' | 'until' | 'durationMin'>, from: Date, to: Date): Date[] {
-  const first = new Date(course.startsAt);
-  const end = lastDay(course);
-  const out: Date[] = [];
-  for (let i = 0; i < 1000; i++) {
-    const d = nthOccurrence(first, course.recurrence, i);
-    if (d > end || d > to) break;
-    if (d.getTime() + course.durationMin * 60e3 >= from.getTime()) out.push(d);
-    if (course.recurrence === 'once') break;
-  }
-  return out;
-}
-
-/** Nombre total de séances d'un cours (pour le résumé de création). */
-export const occurrenceCount = (course: Pick<Course, 'startsAt' | 'recurrence' | 'until' | 'durationMin'>) =>
-  occurrences(course, new Date(course.startsAt), lastDay(course)).length;
-
 export interface GymSession {
   key: string;
   course: Course;
@@ -81,10 +45,6 @@ export interface GymSession {
   left: number;
   coach?: Account;
 }
-
-export const sessionKey = (courseId: string, at: Date | string) => `${courseId}@${new Date(at).toISOString()}`;
-
-const TAKES_SEAT: Ticket['status'][] = ['booked', 'attended', 'no_show'];
 
 export function seatsTaken(db: NetworkDb, courseId: string, atIso: string) {
   return db.tickets.filter((t) => t.courseId === courseId && t.occurrenceAt === atIso && TAKES_SEAT.includes(t.status)).length;
@@ -129,7 +89,7 @@ export function roomConflicts(db: NetworkDb, course: Course): GymSession[] {
   const to = new Date(from.getTime() + 84 * 864e5);
   const mine = occurrences(course, from, to);
   const others = listSessions(db, { gymId: course.gymId, from, to }).filter((s) => s.course.id !== course.id && s.course.room === course.room);
-  return others.filter((o) => mine.some((m) => m < o.end && new Date(m.getTime() + course.durationMin * 60e3) > o.start));
+  return others.filter((o) => mine.some((m) => overlaps(m, course.durationMin, o.start, o.end)));
 }
 
 /* ------------------------------------------------------------------ */
@@ -153,7 +113,6 @@ export function walletOf(db: NetworkDb, clientId: string): WalletView {
 /* Aides                                                              */
 /* ------------------------------------------------------------------ */
 
-export const fullName = (a?: Pick<Account, 'firstName' | 'lastName'>) => (a ? `${a.firstName} ${a.lastName}`.trim() : '—');
 const gymOf = (db: NetworkDb, id: string | null) => db.gyms.find((g) => g.id === id) ?? fail('Salle introuvable.');
 const accountOf = (db: NetworkDb, id: string) => db.accounts.find((a) => a.id === id) ?? fail('Compte introuvable.');
 const courseOf = (db: NetworkDb, id: string) => db.courses.find((c) => c.id === id) ?? fail('Cours introuvable.');
@@ -170,13 +129,7 @@ function move(db: NetworkDb, m: Omit<TokenMove, 'id' | 'at'>) {
   db.moves.push({ id: uid('mv'), at: nowIso(), ...m });
 }
 
-export const RECURRENCE_LABEL: Record<Recurrence, string> = { once: 'Ponctuel', weekly: 'Hebdomadaire', monthly: 'Mensuel', yearly: 'Annuel' };
-
-const ticketCode = () => {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const part = () => Array.from({ length: 4 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
-  return `MLU-${part()}-${part()}`;
-};
+const ticketCode = () => generateTicketCode();
 
 /* ------------------------------------------------------------------ */
 /* Comptes et salles                                                  */
@@ -340,9 +293,9 @@ export function cancelTicket(db: NetworkDb, actor: Account, ticketId: string): {
   must(t.status === 'booked', 'Cette réservation n’est plus active.');
   const course = courseOf(db, t.courseId);
   const gym = gymOf(db, t.gymId);
-  const hours = (new Date(t.occurrenceAt).getTime() - Date.now()) / 3600e3;
-  must(hours > 0, 'La séance a déjà commencé.');
-  const late = hours < gym.cancelHours;
+  const policy = cancellationPolicy(t.occurrenceAt, gym.cancelHours);
+  must(!policy.started, 'La séance a déjà commencé.');
+  const late = policy.late;
   t.status = late ? 'late_cancel' : 'cancelled';
   t.closedAt = nowIso();
   if (late) {
@@ -353,9 +306,7 @@ export function cancelTicket(db: NetworkDb, actor: Account, ticketId: string): {
   return { late: false, refunded: t.tokenCost };
 }
 
-/** Présence validable de 12 h avant le début jusqu'à 1 h après la fin de la séance. */
-const CHECKIN_BEFORE_H = 12;
-const CHECKIN_AFTER_H = 1;
+/* Présence validable de 12 h avant le début jusqu'à 1 h après la fin de la séance (checkInTiming). */
 
 export interface CheckInResult { ticket: Ticket; client: Account; course: Course }
 
@@ -372,11 +323,9 @@ export function checkIn(db: NetworkDb, actor: Account, rawCode: string): CheckIn
   if (t.status === 'attended') fail(`Déjà validé${t.closedAt ? ` à ${hhmm(new Date(t.closedAt))}` : ''} : ${fullName(client)} est bien présent(e).`);
   if (t.status === 'cancelled' || t.status === 'late_cancel') fail('Cette réservation a été annulée.');
   if (t.status === 'no_show') fail('Séance terminée : le client a été marqué absent.');
-  const now = Date.now();
-  const opens = start.getTime() - CHECKIN_BEFORE_H * 3600e3;
-  const closes = start.getTime() + (course.durationMin + CHECKIN_AFTER_H * 60) * 60e3;
-  if (now < opens) fail(`Trop tôt : ce ticket est pour ${dmy(start)} à ${hhmm(start)}.`);
-  if (now > closes) fail('Trop tard : la séance est terminée.');
+  const timing = checkInTiming(start, course.durationMin);
+  if (timing === 'too_early') fail(`Trop tôt : ce ticket est pour ${dmy(start)} à ${hhmm(start)}.`);
+  if (timing === 'too_late') fail('Trop tard : la séance est terminée.');
   t.status = 'attended';
   t.closedAt = nowIso();
   t.checkedInBy = actor.id;
@@ -387,12 +336,7 @@ export function checkIn(db: NetworkDb, actor: Account, rawCode: string): CheckIn
 
 /** Clients réservés qui ne se sont pas présentés : marqués absents, jetons débités. */
 export function pendingNoShows(db: NetworkDb, now = Date.now()) {
-  return db.tickets.filter((t) => {
-    if (t.status !== 'booked') return false;
-    const course = db.courses.find((c) => c.id === t.courseId);
-    const end = new Date(t.occurrenceAt).getTime() + ((course?.durationMin ?? 60) + CHECKIN_AFTER_H * 60) * 60e3;
-    return end < now;
-  });
+  return db.tickets.filter((t) => isNoShowDue(t, db.courses.find((c) => c.id === t.courseId)?.durationMin, now));
 }
 
 export function sweepNoShows(db: NetworkDb, now = Date.now()): number {
@@ -410,8 +354,6 @@ export function sweepNoShows(db: NetworkDb, now = Date.now()): number {
 /* ------------------------------------------------------------------ */
 /* Recharge à l'accueil                                               */
 /* ------------------------------------------------------------------ */
-
-export const METHOD_LABEL: Record<NonNullable<TokenMove['method']>, string> = { cash: 'Espèces', card_terminal: 'TPE (carte)', transfer: 'Virement', other: 'Autre' };
 
 export function rechargeTokens(db: NetworkDb, actor: Account, clientId: string, amount: number, method: NonNullable<TokenMove['method']>, note?: string): RechargeQuote {
   must(actor.role === 'backoffice', 'Seul l’accueil recharge les jetons.');
@@ -435,45 +377,13 @@ export function rechargeTokens(db: NetworkDb, actor: Account, clientId: string, 
 /* Tarifs et promotions (administrateur)                              */
 /* ------------------------------------------------------------------ */
 
-/** « 225 DT », « 8,500 DT ». */
-export const formatTnd = (n: number) => {
-  const r = Math.round(n * 1000) / 1000;
-  const s = Number.isInteger(r) ? String(r) : r.toFixed(3).replace(/0+$/, '').replace('.', ',');
-  return `${s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} DT`;
-};
-
-const todayYmd = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-
-export type PromoState = 'active' | 'scheduled' | 'expired' | 'disabled';
-export function promoState(p: Promotion, now = new Date()): PromoState {
-  if (!p.active) return 'disabled';
-  const today = todayYmd(now);
-  if (today < p.startsOn) return 'scheduled';
-  if (today > p.endsOn) return 'expired';
-  return 'active';
-}
-
 export const activePromotions = (db: NetworkDb, gymId: string, now = new Date()) =>
   db.promotions.filter((p) => p.gymId === gymId && promoState(p, now) === 'active');
-
-export const promoLabel = (p: Pick<Promotion, 'kind' | 'value' | 'minTokens'>) =>
-  p.kind === 'percent_off' ? `−${p.value} % sur les recharges${p.minTokens ? ` dès ${p.minTokens} jetons` : ''}` : `+${p.value} jetons offerts dès ${p.minTokens} jetons achetés`;
-
-export interface RechargeQuote {
-  amount: number; unitPrice: number; base: number; discount: number; total: number; bonus: number;
-  percentPromo?: Promotion; bonusPromo?: Promotion;
-}
 
 /** Prix d'une recharge dans une salle, avec la meilleure remise et le meilleur bonus applicables. */
 export function quoteRecharge(db: NetworkDb, gymId: string, amount: number, now = new Date()): RechargeQuote {
   const gym = gymOf(db, gymId);
-  const unitPrice = gym.tokenPriceTnd;
-  const base = Math.round(amount * unitPrice * 1000) / 1000;
-  const promos = activePromotions(db, gymId, now).filter((p) => amount >= p.minTokens);
-  const percentPromo = promos.filter((p) => p.kind === 'percent_off').sort((a, b) => b.value - a.value)[0];
-  const bonusPromo = promos.filter((p) => p.kind === 'bonus_tokens').sort((a, b) => b.value - a.value)[0];
-  const discount = percentPromo ? Math.round(base * Math.min(percentPromo.value, 90) * 10) / 1000 : 0;
-  return { amount, unitPrice, base, discount, total: Math.round((base - discount) * 1000) / 1000, bonus: bonusPromo?.value ?? 0, percentPromo, bonusPromo };
+  return quoteFromPromotions(gym.tokenPriceTnd, db.promotions.filter((p) => p.gymId === gymId), amount, now);
 }
 
 export function setTokenPrice(db: NetworkDb, actor: Account, gymId: string, price: number) {
@@ -523,9 +433,6 @@ export function deletePromotion(db: NetworkDb, actor: Account, promoId: string) 
 /* Évaluations des coachs                                             */
 /* ------------------------------------------------------------------ */
 
-/** Délai pour évaluer une séance après sa fin. */
-const RATING_WINDOW_DAYS = 30;
-
 const sessionEnd = (db: NetworkDb, t: Ticket) => {
   const c = db.courses.find((x) => x.id === t.courseId);
   return new Date(t.occurrenceAt).getTime() + (c?.durationMin ?? 60) * 60e3;
@@ -533,8 +440,7 @@ const sessionEnd = (db: NetworkDb, t: Ticket) => {
 
 /** Le client peut-il évaluer ce ticket ? (présent, séance terminée, pas encore noté, moins de 30 jours) */
 export function canRate(db: NetworkDb, t: Ticket, now = Date.now()) {
-  const end = sessionEnd(db, t);
-  return t.status === 'attended' && end <= now && now - end < RATING_WINDOW_DAYS * 864e5 && !db.ratings.some((r) => r.ticketId === t.id);
+  return canRateTicket(t, sessionEnd(db, t), db.ratings.some((r) => r.ticketId === t.id), now);
 }
 
 export const ratingsToGive = (db: NetworkDb, clientId: string, now = Date.now()) =>
@@ -558,14 +464,9 @@ export function rateSession(db: NetworkDb, actor: Account, ticketId: string, sta
   return rating;
 }
 
-export interface CoachRating { avg: number; count: number; distribution: number[]; reviews: Rating[] }
-
 /** Note moyenne d'un coach (toutes séances évaluées) et avis écrits les plus récents. */
 export function coachRating(db: NetworkDb, coachId: string): CoachRating {
-  const list = db.ratings.filter((r) => r.coachId === coachId).sort((a, b) => b.at.localeCompare(a.at));
-  const distribution = [1, 2, 3, 4, 5].map((s) => list.filter((r) => r.stars === s).length);
-  const avg = list.length ? Math.round((list.reduce((n, r) => n + r.stars, 0) / list.length) * 10) / 10 : 0;
-  return { avg, count: list.length, distribution, reviews: list.filter((r) => r.comment) };
+  return aggregateRatings(db.ratings.filter((r) => r.coachId === coachId));
 }
 
 export function markAllRead(db: NetworkDb, accountId: string) {
