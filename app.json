@@ -31,7 +31,8 @@
         {
           "cameraPermission": "MILIEU utilise la caméra pour scanner les tickets QR des clients à l’entrée des cours."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "extra": {
       "supportsRTL": true

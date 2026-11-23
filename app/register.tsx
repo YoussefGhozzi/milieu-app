@@ -7,9 +7,11 @@ import { BottomBar, Checkbox, Header, TextField } from '@/components/Chrome';
 import { Appear } from '@/components/motion';
 import { useToast } from '@/components/Toast';
 import { useDemo } from '@/demo/DemoProvider';
+import { isApi } from '@/api/config';
+import { ApiFrontDeskOnly } from '@/api/ApiLogin';
 
 /** A03 — Inscription rapide : 3 champs + consentements, le profil se complète plus tard. */
-export default function Register() {
+function DemoRegister() {
   const { register } = useDemo();
   const toast = useToast();
   const [form, setForm] = useState({ firstName: '', contact: '', password: '' });
@@ -75,3 +77,7 @@ export default function Register() {
     </KeyboardAvoidingView>
   );
 }
+
+/** Vraie API : les comptes sont créés par l'accueil. */
+const ApiRegister = () => <ApiFrontDeskOnly title="Créer un compte" />;
+export default isApi ? ApiRegister : DemoRegister;

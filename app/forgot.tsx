@@ -6,9 +6,11 @@ import { CheckCircle2, Lock, Mail } from 'lucide-react-native';
 import { Button, Text, cn, colors } from '@milieu/ui';
 import { BottomBar, Header, TextField } from '@/components/Chrome';
 import { useToast } from '@/components/Toast';
+import { isApi } from '@/api/config';
+import { ApiFrontDeskOnly } from '@/api/ApiLogin';
 
 /** A05 — Mot de passe oublié : e-mail → code à 6 chiffres → nouveau mot de passe → terminé. */
-export default function Forgot() {
+function DemoForgot() {
   const toast = useToast();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [contact, setContact] = useState('');
@@ -87,3 +89,7 @@ export default function Forgot() {
     </View>
   );
 }
+
+/** Vraie API : l'accueil réinitialise le mot de passe. */
+const ApiForgot = () => <ApiFrontDeskOnly title="Mot de passe oublié" />;
+export default isApi ? ApiForgot : DemoForgot;

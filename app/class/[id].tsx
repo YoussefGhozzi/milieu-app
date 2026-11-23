@@ -11,13 +11,15 @@ import { Appear } from '@/components/motion';
 import { useToast } from '@/components/Toast';
 import { INTENSITY_LABEL, disciplineStyle } from '@/lib/disciplines';
 import { dayLabel, dayLong, hoursUntil, time } from '@/lib/format';
+import { problemMessage } from '@milieu/contracts';
+import i18n from '@/i18n';
 
 /** A08 détail · A09 confirmation · A11 liste d'attente. */
 export default function ClassDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const { view, bookingFor, balance, book, cancel, simulateSeatFreed, studio } = useDemo();
+  const { view, bookingFor, balance, book, cancel, simulateSeatFreed, studio, live } = useDemo();
   const v = view(id);
   const [sheet, setSheet] = useState<'book' | 'waitlist' | null>(null);
   const [busy, setBusy] = useState(false);
@@ -42,14 +44,24 @@ export default function ClassDetail() {
 
   const confirm = () => {
     setBusy(true);
-    setTimeout(() => {
-      const r = book(session.id);
-      setBusy(false);
-      setSheet(null);
-      if (r.kind === 'booked') router.replace({ pathname: '/booking/success', params: { id: r.bookingId } });
-      else if (r.kind === 'waitlist') toast(`Vous êtes n° ${r.position} sur la liste d’attente`, 'info');
-      else if (r.kind === 'insufficient') toast(`Il vous manque ${r.missing} jetons`, 'danger');
-    }, 700);
+    // Démo : petit délai simulé ; vraie API : on attend la réponse du serveur.
+    setTimeout(async () => {
+      try {
+        const r = await book(session.id);
+        setSheet(null);
+        if (r.kind === 'booked') router.replace({ pathname: '/booking/success', params: { id: r.bookingId } });
+        else if (r.kind === 'waitlist') toast(`Vous êtes n° ${r.position} sur la liste d’attente`, 'info');
+        else if (r.kind === 'insufficient') toast(`Il vous manque ${r.missing} jetons`, 'danger');
+        else if (r.kind === 'already') router.push(`/booking/${r.bookingId}`);
+      } catch (e) {
+        toast(problemMessage(e, i18n.language as 'fr' | 'en' | 'ar'), 'danger');
+      } finally {
+        setBusy(false);
+      }
+    }, live ? 0 : 700);
+  };
+  const leaveWaitlist = async (bookingId: string) => {
+    try { await cancel(bookingId); toast('Vous avez quitté la liste d’attente', 'info'); } catch (e) { toast(problemMessage(e, i18n.language as 'fr' | 'en' | 'ar'), 'danger'); }
   };
 
   const facts = [
@@ -144,11 +156,15 @@ export default function ClassDetail() {
           <View className="gap-2">
             <View className="flex-row items-center gap-2 rounded-lg bg-warning-soft p-3">
               <Hourglass size={16} color={colors.warning.DEFAULT} />
-              <Text variant="label" className="flex-1">Liste d’attente : position {mine.waitlistPosition}. Aucun jeton débité.</Text>
+              <Text variant="label" className="flex-1">
+                {live ? `Liste d’attente : position ${mine.waitlistPosition}. ${session.tokenCost} jetons retenus, rendus si aucune place ne se libère.` : `Liste d’attente : position ${mine.waitlistPosition}. Aucun jeton débité.`}
+              </Text>
             </View>
-            <Button block label="Démo : une place se libère" icon={<Sparkles size={18} color={colors.brand.foreground} />}
-              onPress={() => (simulateSeatFreed(session.id) ? toast('Une place s’est libérée : votre réservation est confirmée !') : toast('Solde insuffisant pour être promu', 'danger'))} />
-            <Button block variant="ghost" label="Quitter la liste d’attente" onPress={() => { cancel(mine.id); toast('Vous avez quitté la liste d’attente', 'info'); }} />
+            {live ? null : (
+              <Button block label="Démo : une place se libère" icon={<Sparkles size={18} color={colors.brand.foreground} />}
+                onPress={() => (simulateSeatFreed(session.id) ? toast('Une place s’est libérée : votre réservation est confirmée !') : toast('Solde insuffisant pour être promu', 'danger'))} />
+            )}
+            <Button block variant="ghost" label="Quitter la liste d’attente" onPress={() => void leaveWaitlist(mine.id)} />
           </View>
         ) : full ? (
           <Button block size="lg" variant="outline" label="Rejoindre la liste d’attente" icon={<Hourglass size={18} color={colors.brand.DEFAULT} />} onPress={() => setSheet('waitlist')} />
@@ -189,8 +205,17 @@ export default function ClassDetail() {
         <View className="gap-3">
           <Text tone="muted">Ce cours est complet. Si une place se libère, vous êtes inscrit automatiquement et prévenu par notification.</Text>
           <View className="gap-2 rounded-lg bg-surface-raised p-4">
-            <Text variant="label">• Aucun jeton n’est débité maintenant.</Text>
-            <Text variant="label">• {session.tokenCost} jetons seront retenus seulement si vous obtenez une place.</Text>
+            {live ? (
+              <>
+                <Text variant="label">• {session.tokenCost} jetons sont retenus dès maintenant.</Text>
+                <Text variant="label">• Aucune place libérée avant le cours : ils vous sont rendus automatiquement.</Text>
+              </>
+            ) : (
+              <>
+                <Text variant="label">• Aucun jeton n’est débité maintenant.</Text>
+                <Text variant="label">• {session.tokenCost} jetons seront retenus seulement si vous obtenez une place.</Text>
+              </>
+            )}
             <Text variant="label">• Vous pouvez quitter la liste à tout moment.</Text>
           </View>
           <Button block size="lg" label="Rejoindre la liste" loading={busy} onPress={confirm} />

@@ -6,6 +6,8 @@ import QRCode from 'react-native-qrcode-svg';
 import { AlertTriangle, CalendarPlus, Expand, Hourglass, Navigation, ShieldCheck, X } from 'lucide-react-native';
 import { Badge, Button, EmptyState, Sheet, Text, TokenAmount, colors } from '@milieu/ui';
 import { useDemo } from '@/demo/DemoProvider';
+import { problemMessage } from '@milieu/contracts';
+import i18n from '@/i18n';
 import { BottomBar, Header } from '@/components/Chrome';
 import { DisciplineArt, statusBadge } from '@/components/ClassVisuals';
 import { useToast } from '@/components/Toast';
@@ -39,12 +41,18 @@ export default function BookingDetail() {
   const active = upcoming && (booking.status === 'booked' || booking.status === 'waitlist');
   const late = hoursUntil(v.session.startsAt) < studio.cancelHours;
   const badge = statusBadge(booking.status);
-  const code = (booking.qr ?? booking.id).slice(-8).toUpperCase();
+  // Vraie API : le code court du ticket (MLU-XXXX-XXXX), que l'accueil peut taper si le QR ne passe pas.
+  const code = (booking as { code?: string }).code ?? (booking.qr ?? booking.id).slice(-8).toUpperCase();
 
-  const doCancel = () => {
-    const r = cancel(booking.id);
-    setSheet(false);
-    toast(booking.status === 'waitlist' ? 'Vous avez quitté la liste d’attente' : r.late ? 'Réservation annulée (annulation tardive)' : `Réservation annulée · ${r.refunded} jetons remboursés`, r.late ? 'info' : 'success');
+  const doCancel = async () => {
+    try {
+      const r = await cancel(booking.id);
+      setSheet(false);
+      toast(booking.status === 'waitlist' ? 'Vous avez quitté la liste d’attente' : r.late ? 'Réservation annulée (annulation tardive)' : `Réservation annulée · ${r.refunded} jetons remboursés`, r.late ? 'info' : 'success');
+    } catch (e) {
+      setSheet(false);
+      toast(problemMessage(e, i18n.language as 'fr' | 'en' | 'ar'), 'danger');
+    }
   };
 
   return (
@@ -97,7 +105,7 @@ export default function BookingDetail() {
                 <View className="items-center gap-1 p-6">
                   <Text variant="heading">{badge.label}</Text>
                   <Text tone="muted" className="text-center">
-                    {booking.status === 'attended' ? 'Merci pour votre venue ! Ce cours a bien été validé.' : booking.status === 'late_cancel' ? 'Annulée moins de 12 h avant : les jetons n’ont pas été remboursés.' : 'Cette réservation n’est plus active.'}
+                    {booking.status === 'attended' ? 'Merci pour votre venue ! Ce cours a bien été validé.' : booking.status === 'late_cancel' ? `Annulée moins de ${studio.cancelHours} h avant : les jetons n’ont pas été remboursés.` : 'Cette réservation n’est plus active.'}
                   </Text>
                 </View>
               )}

@@ -12,7 +12,7 @@ import { locale } from '@/lib/format';
 export default function Profile() {
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const { state, balance, unread, logout, resetDemo } = useDemo();
+  const { state, balance, unread, logout, resetDemo, live } = useDemo();
   const attended = state.bookings.filter((b) => b.status === 'attended').length;
   const upcoming = state.bookings.filter((b) => b.status === 'booked').length;
   const since = new Date(state.member.memberSince).toLocaleDateString(locale(), { month: 'long', year: 'numeric' });
@@ -68,15 +68,19 @@ export default function Profile() {
 
         <Appear index={4}>
           <Card className="mt-6 py-1">
-            <ListRow icon={<Palette size={18} color={colors.foreground.muted} />} title="Direction visuelle (démo)" onPress={() => router.push('/catalogue')} />
-            <Divider />
-            <ListRow icon={<RotateCcw size={18} color={colors.foreground.muted} />} title="Recommencer la démo" subtitle="Revient à l’écran de bienvenue avec les données d’origine"
-              onPress={() => { resetDemo(); router.replace('/welcome'); }} />
-            <Divider />
+            {live ? null : (
+              <>
+                <ListRow icon={<Palette size={18} color={colors.foreground.muted} />} title="Direction visuelle (démo)" onPress={() => router.push('/catalogue')} />
+                <Divider />
+                <ListRow icon={<RotateCcw size={18} color={colors.foreground.muted} />} title="Recommencer la démo" subtitle="Revient à l’écran de bienvenue avec les données d’origine"
+                  onPress={() => { resetDemo(); router.replace('/welcome'); }} />
+                <Divider />
+              </>
+            )}
             <ListRow icon={<LogOut size={18} color={colors.danger.DEFAULT} />} title="Se déconnecter" chevron={false}
               onPress={() => { logout(); toast('Vous êtes déconnecté', 'info'); router.replace('/login'); }} />
           </Card>
-          <Text variant="caption" tone="subtle" className="mt-6 text-center">MILIEU · version de démonstration 0.1</Text>
+          <Text variant="caption" tone="subtle" className="mt-6 text-center">{live ? 'MILIEU · 0.1' : 'MILIEU · version de démonstration 0.1'}</Text>
         </Appear>
       </View>
     </ScrollView>

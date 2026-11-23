@@ -10,12 +10,17 @@ import { Appear } from '@/components/motion';
 /** A15 — Portefeuille : solde par type de jetons et derniers mouvements. */
 export default function Wallet() {
   const insets = useSafeAreaInsets();
-  const { state, balance } = useDemo();
+  const { state, balance, studio, live, walletDetail } = useDemo();
   const bonusTotal = state.wallet.bonus.reduce((n, b) => n + b.amount, 0);
   const firstExpiry = [...state.wallet.bonus].sort((a, b) => a.expiresAt.localeCompare(b.expiresAt))[0];
   const daysLeft = firstExpiry ? Math.ceil((new Date(firstExpiry.expiresAt).getTime() - Date.now()) / 864e5) : 0;
 
-  const buckets = [
+  // Vraie API : le solde réel (disponible, retenu par les réservations, dépensé, jetons offerts) ; démo : achetés, bonus, récompenses.
+  const buckets = live ? [
+    { icon: ShoppingBag, color: colors.foreground.DEFAULT, label: 'Jetons rechargés', value: walletDetail?.recharged ?? 0, note: 'N’expirent jamais' },
+    { icon: Clock3, color: colors.brand.DEFAULT, label: 'Retenus', value: walletDetail?.held ?? 0, note: 'Réservations à venir et listes d’attente' },
+    { icon: Gift, color: colors.success.DEFAULT, label: 'Jetons offerts', value: walletDetail?.offered ?? 0, note: `${walletDetail?.spent ?? 0} jetons dépensés en cours` },
+  ] : [
     { icon: ShoppingBag, color: colors.foreground.DEFAULT, label: 'Jetons achetés', value: state.wallet.purchased, note: 'N’expirent jamais' },
     { icon: Clock3, color: colors.brand.DEFAULT, label: 'Jetons bonus', value: bonusTotal, note: firstExpiry ? `Expirent dans ${daysLeft} jours · utilisés en premier` : 'Aucun bonus en cours' },
     { icon: Gift, color: colors.success.DEFAULT, label: 'Récompenses', value: state.wallet.reward, note: 'Crédits café : voir MILIEU Perks' },
@@ -31,7 +36,7 @@ export default function Wallet() {
             <Text variant="overline" tone="brand">Solde disponible</Text>
             <View className="mt-3"><TokenAmount value={balance} size="lg" /></View>
             <Text variant="label" tone="muted" className="mt-2">≈ {Math.floor(balance / 4)} cours de Lagree ou {Math.floor(balance / 2)} cours de Mat Pilates</Text>
-            <Button className="mt-5" label="Acheter des jetons" icon={<Plus size={18} color={colors.brand.foreground} />} onPress={() => router.push('/shop')} />
+            <Button className="mt-5" label="Recharger à l’accueil" icon={<Plus size={18} color={colors.brand.foreground} />} onPress={() => router.push('/shop')} />
           </View>
         </Appear>
 
@@ -69,7 +74,7 @@ export default function Wallet() {
         <Appear index={4}>
           <View className="mt-6 gap-2 rounded-lg border border-border bg-surface-sunken p-4">
             <Text variant="label" className="font-semibold">Comment fonctionnent les jetons ?</Text>
-            <Text variant="caption" tone="muted">Chaque cours coûte un nombre fixe de jetons (Lagree 4, Hot Sculpt 3, Pilates 2). Ils sont retenus à la réservation et remboursés si vous annulez au moins 12 h avant.</Text>
+            <Text variant="caption" tone="muted">Chaque cours coûte un nombre fixe de jetons (Lagree 4, Hot Sculpt 3, Pilates 2). Ils sont retenus à la réservation et remboursés si vous annulez au moins {studio.cancelHours} h avant.</Text>
           </View>
         </Appear>
       </View>

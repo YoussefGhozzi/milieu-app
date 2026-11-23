@@ -22,13 +22,13 @@ export type BookResult =
 
 export type PaymentOutcome = 'success' | 'pending' | 'failure';
 
-interface Store extends DemoState {
+export interface Store extends DemoState {
   onboarded: boolean;
   loggedIn: boolean;
   holds: Record<string, Hold>;
 }
 
-interface DemoContextValue {
+export interface DemoContextValue {
   state: Store;
   studio: typeof studio;
   balance: number;
@@ -40,15 +40,28 @@ interface DemoContextValue {
   register: (firstName: string, contact: string) => void;
   logout: () => void;
   resetDemo: () => void;
-  book: (sessionId: string) => BookResult;
-  cancel: (bookingId: string) => { late: boolean; refunded: number };
+  /** Asynchrone avec la vraie API : toujours attendre le résultat (`await book(id)`). */
+  book: (sessionId: string) => BookResult | Promise<BookResult>;
+  cancel: (bookingId: string) => { late: boolean; refunded: number } | Promise<{ late: boolean; refunded: number }>;
   simulateSeatFreed: (sessionId: string) => boolean;
   buyPack: (packId: string, outcome: PaymentOutcome) => { tokens: number; balanceAfter: number };
-  markAllRead: () => void;
-  updateMember: (patch: Partial<DemoState['member']>) => void;
+  markAllRead: () => void | Promise<void>;
+  updateMember: (patch: Partial<DemoState['member']>) => void | Promise<void>;
+  /** Vraie API (EXPO_PUBLIC_DATA_SOURCE=api) : données réelles, pas de simulation. Absent en démo. */
+  live?: boolean;
+  /** Vraie API : connexion par e-mail et mot de passe (en démo, `login()` suffit). */
+  signIn?: (email: string, password: string) => Promise<{ mustChangePassword: boolean }>;
+  /** Vraie API : choisir son mot de passe (première connexion) ou le changer. */
+  changePassword?: (current: string, next: string) => Promise<void>;
+  /** Vraie API : premier chargement en cours. */
+  loading?: boolean;
+  /** Vraie API : mot de passe temporaire à remplacer avant d'utiliser l'app. */
+  mustChangePassword?: boolean;
+  /** Vraie API : détail du solde réel. */
+  walletDetail?: { available: number; held: number; spent: number; recharged: number; offered: number };
 }
 
-const DemoContext = createContext<DemoContextValue | null>(null);
+export const DemoContext = createContext<DemoContextValue | null>(null);
 const nowIso = () => new Date().toISOString();
 const uid = (p: string) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 

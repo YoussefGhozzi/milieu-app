@@ -9,6 +9,7 @@ import { ClassCard, DisciplineArt } from '@/components/ClassVisuals';
 import { Appear, Tap } from '@/components/motion';
 import { Grid } from '@/components/Grid';
 import { GymPromos } from '@/components/GymPromos';
+import { ApiGymPromos } from '@/api/ApiGymPromos';
 import { Logo } from '@/components/Logo';
 import { useAppTheme } from '@/theme/AppTheme';
 import { disciplineStyle } from '@/lib/disciplines';
@@ -17,7 +18,7 @@ import { dayLabel, dayLong, hoursUntil, locale, sameDay, time } from '@/lib/form
 /** A06 — Accueil : solde, prochain cours avec QR, cours du jour, disciplines. */
 export default function Home() {
   const insets = useSafeAreaInsets();
-  const { state, studio, balance, unread, view, bookingFor } = useDemo();
+  const { state, studio, balance, unread, view, bookingFor, live } = useDemo();
   const { upcoming } = useMyBookings();
   const { mode, toggle } = useAppTheme();
   const next = upcoming.find((r) => r.booking.status === 'booked');
@@ -82,10 +83,10 @@ export default function Home() {
               <Text variant="overline" tone="brand">Votre solde</Text>
               <View className="mt-2 flex-row items-end gap-2">
                 <TokenAmount value={balance} size="lg" />
-                <Text variant="label" tone="muted" className="mb-1.5">M Tokens</Text>
+                <Text variant="label" tone="muted" className="mb-1.5">{live ? 'jetons' : 'M Tokens'}</Text>
               </View>
               <View className="mt-3 flex-row flex-wrap gap-2">
-                <Badge label={`${state.wallet.purchased} achetés`} />
+                {live ? null : <Badge label={`${state.wallet.purchased} achetés`} />}
                 {bonus ? <Badge tone="brand" label={`${bonus.amount} bonus · jusqu’au ${new Date(bonus.expiresAt).toLocaleDateString(locale(), { day: 'numeric', month: 'short' })}`} /> : null}
               </View>
               <View className="mt-5 flex-row gap-3">
@@ -97,7 +98,7 @@ export default function Home() {
         </Appear>
 
         {/* À l'affiche : cours des coachs validés par l'accueil de la salle (réseau multi-salles) */}
-        <GymPromos />
+        {live ? <ApiGymPromos /> : <GymPromos />}
 
         {/* Prochain cours */}
         <Appear index={2}>

@@ -1,10 +1,14 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
+import { useDemo } from '@/demo/DemoProvider';
 import { CalendarDays, House, Ticket, User, Wallet } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@milieu/ui';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const { state, live, loading } = useDemo();
+  // Vraie API : session terminée (expirée, fermée ailleurs, compte désactivé) → retour à la connexion.
+  if (live && !loading && !state.loggedIn) return <Redirect href="/login" />;
   return (
     <Tabs
       screenOptions={{
@@ -18,7 +22,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="index" options={{ title: t('tabs.home'), tabBarIcon: ({ color, size }) => <House color={color} size={size} /> }} />
       <Tabs.Screen name="planning" options={{ title: t('tabs.planning'), tabBarIcon: ({ color, size }) => <CalendarDays color={color} size={size} /> }} />
       <Tabs.Screen name="bookings" options={{ title: t('tabs.bookings'), tabBarIcon: ({ color, size }) => <Ticket color={color} size={size} /> }} />
-      <Tabs.Screen name="wallet" options={{ title: t('tabs.wallet'), tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} /> }} />
+      <Tabs.Screen name="wallet" options={{ title: live ? t('tabs.tokens') : t('tabs.wallet'), tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} /> }} />
       <Tabs.Screen name="profile" options={{ title: t('tabs.profile'), tabBarIcon: ({ color, size }) => <User color={color} size={size} /> }} />
     </Tabs>
   );
