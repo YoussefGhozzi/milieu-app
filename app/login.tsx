@@ -9,9 +9,11 @@ import { useToast } from '@/components/Toast';
 import { useDemo } from '@/demo/DemoProvider';
 import { Logo } from '@/components/Logo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { isApi } from '@/api/config';
+import { ApiLogin } from '@/api/ApiLogin';
 
 /** A04 — Connexion (e-mail ou téléphone). Un raccourci remplit le compte de démo. */
-export default function Login() {
+function DemoLogin() {
   const { login, state } = useDemo();
   const toast = useToast();
   const insets = useSafeAreaInsets();
@@ -70,3 +72,6 @@ export default function Login() {
     </KeyboardAvoidingView>
   );
 }
+
+/** Vraie API : e-mail et mot de passe de l'accueil ; démo : connexion simulée. */
+export default isApi ? ApiLogin : DemoLogin;

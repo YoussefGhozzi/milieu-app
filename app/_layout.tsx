@@ -8,6 +8,11 @@ import { StatusBar } from 'expo-status-bar';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { colors } from '@milieu/ui';
 import { DemoProvider } from '@/demo/DemoProvider';
+import { ApiMemberProvider } from '@/api/ApiMemberProvider';
+import { isApi } from '@/api/config';
+
+/** Données du membre : vraie API (EXPO_PUBLIC_DATA_SOURCE=api) ou démo autonome (par défaut). */
+const MemberProvider = isApi ? ApiMemberProvider : DemoProvider;
 import { NetworkProvider } from '@/backend/NetworkProvider';
 import { LaunchScreen } from '@/components/LaunchScreen';
 import { ToastProvider } from '@/components/Toast';
@@ -25,7 +30,6 @@ function Shell() {
           <Stack.Screen name="welcome" options={{ animation: 'fade' }} />
           <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
           <Stack.Screen name="booking/success" options={{ animation: 'fade', gestureEnabled: false }} />
-          <Stack.Screen name="payment-result" options={{ animation: 'fade', gestureEnabled: false }} />
         </Stack>
       </ToastProvider>
     </ThemeProvider>
@@ -45,11 +49,11 @@ export default function RootLayout() {
     document.head.appendChild(link);
   }, []);
   return (
-    <DemoProvider>
+    <MemberProvider>
       <NetworkProvider>
         <AppThemeProvider><Shell /></AppThemeProvider>
         {!launched && <LaunchScreen onDone={done} />}
       </NetworkProvider>
-    </DemoProvider>
+    </MemberProvider>
   );
 }

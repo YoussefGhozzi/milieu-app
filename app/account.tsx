@@ -6,17 +6,30 @@ import { Avatar, Button, Text, colors } from '@milieu/ui';
 import { useDemo } from '@/demo/DemoProvider';
 import { BottomBar, Header, TextField } from '@/components/Chrome';
 import { useToast } from '@/components/Toast';
+import { problemMessage } from '@milieu/contracts';
+import i18n from '@/i18n';
 
 /** A22 (suite) — Mes informations : profil progressif, rien d'obligatoire au-delà de l'inscription. */
 export default function Account() {
-  const { state, updateMember } = useDemo();
+  const { state, updateMember, live } = useDemo();
   const toast = useToast();
   const [form, setForm] = useState({ firstName: state.member.firstName, lastName: state.member.lastName, email: state.member.email, phone: state.member.phone });
   const [busy, setBusy] = useState(false);
 
   const save = () => {
     setBusy(true);
-    setTimeout(() => { updateMember(form); setBusy(false); toast('Informations enregistrées'); router.back(); }, 600);
+    // Démo : petit délai simulé ; vraie API : enregistrement sur le serveur (l'e-mail se change à l'accueil).
+    setTimeout(async () => {
+      try {
+        await updateMember(form);
+        toast('Informations enregistrées');
+        router.back();
+      } catch (e) {
+        toast(problemMessage(e, i18n.language as 'fr' | 'en' | 'ar'), 'danger');
+      } finally {
+        setBusy(false);
+      }
+    }, live ? 0 : 600);
   };
 
   return (
@@ -30,7 +43,8 @@ export default function Account() {
           </View>
           <TextField label="Prénom" value={form.firstName} onChangeText={(v) => setForm({ ...form, firstName: v })} icon={<User size={18} color={colors.foreground.muted} />} />
           <TextField label="Nom" value={form.lastName} onChangeText={(v) => setForm({ ...form, lastName: v })} icon={<User size={18} color={colors.foreground.muted} />} />
-          <TextField label="E-mail" autoCapitalize="none" keyboardType="email-address" value={form.email} onChangeText={(v) => setForm({ ...form, email: v })} icon={<Mail size={18} color={colors.foreground.muted} />} />
+          <TextField label="E-mail" autoCapitalize="none" keyboardType="email-address" value={form.email} onChangeText={(v) => setForm({ ...form, email: v })} icon={<Mail size={18} color={colors.foreground.muted} />}
+            editable={!live} hint={live ? 'Pour changer d’e-mail, adressez-vous à l’accueil de votre salle.' : undefined} />
           <TextField label="Téléphone" keyboardType="phone-pad" value={form.phone} onChangeText={(v) => setForm({ ...form, phone: v })} icon={<Phone size={18} color={colors.foreground.muted} />}
             hint="Utilisé pour les rappels de cours et les codes de vérification." />
           <Text variant="caption" tone="subtle">MILIEU ne demande aucune donnée de santé. Vos informations restent confidentielles.</Text>

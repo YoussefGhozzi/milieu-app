@@ -28,7 +28,7 @@ function ToggleRow({ title, subtitle, value, onChange }: { title: string; subtit
 export default function SettingsScreen() {
   const { i18n } = useTranslation();
   const toast = useToast();
-  const { resetDemo } = useDemo();
+  const { resetDemo, live } = useDemo();
   const { mode, setMode } = useAppTheme();
   const [prefs, setPrefs] = useState({ reminders: true, waitlist: true, offers: false, marketing: false, analytics: true });
   const [del, setDel] = useState(false);
@@ -83,9 +83,15 @@ export default function SettingsScreen() {
 
       <Sheet open={del} onClose={() => setDel(false)} title="Supprimer votre compte ?">
         <View className="gap-4">
-          <Text tone="muted">Vos réservations à venir seront annulées et vos jetons restants seront perdus. Cette action est définitive.</Text>
-          <Button block size="lg" variant="destructive" label="Supprimer définitivement"
-            onPress={() => { setDel(false); resetDemo(); toast('Compte supprimé (démo)', 'info'); router.replace('/welcome'); }} />
+          {live ? (
+            <Text tone="muted">La suppression de votre compte se fait à l’accueil de votre salle : vos réservations à venir et vos jetons restants y sont réglés avec vous.</Text>
+          ) : (
+            <>
+              <Text tone="muted">Vos réservations à venir seront annulées et vos jetons restants seront perdus. Cette action est définitive.</Text>
+              <Button block size="lg" variant="destructive" label="Supprimer définitivement"
+                onPress={() => { setDel(false); resetDemo(); toast('Compte supprimé (démo)', 'info'); router.replace('/welcome'); }} />
+            </>
+          )}
           <Button block variant="ghost" label="Annuler" onPress={() => setDel(false)} />
         </View>
       </Sheet>
