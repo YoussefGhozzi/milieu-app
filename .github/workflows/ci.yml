@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Lecture de @youssefghozzi/milieu-contracts et milieu-ui sur GitHub Packages (paquets publics).
+  NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  IMAGE: ghcr.io/${{ github.repository_owner }}/milieu-app-web
+
+jobs:
+  test:
+    name: Types et tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm test
+
+  docker:
+    name: Image web — build, démarrage, adresse de l'API, publication
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Nom de l'image en minuscules
+        run: echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV"
+      - run: docker build --secret id=npm_token,env=NPM_TOKEN -t "$IMAGE:ci" .
+      - name: L'image démarre, sert l'app sur toutes les routes et injecte l'adresse de l'API
+        run: |
+          docker run -d --name app -p 8080:80 -e API_URL=https://api.exemple.tn "$IMAGE:ci"
+          for i in $(seq 1 20); do [ "$(docker inspect -f '{{.State.Health.Status}}' app)" = "healthy" ] && break; sleep 1; done
+          [ "$(docker inspect -f '{{.State.Health.Status}}' app)" = "healthy" ] || { docker logs app; exit 1; }
+          curl -fsS http://localhost:8080/planning | grep -q '<div id="root">'
+          # L'adresse est dans l'un des paquets JavaScript servis (pas forcément le premier) ; le repère ne doit plus exister nulle part.
+          found=0
+          for js in $(curl -fsS http://localhost:8080/ | grep -o '/_expo/static/js/web/[^"]*\.js'); do
+            body=$(curl -fsS "http://localhost:8080$js")
+            echo "$body" | grep -q 'https://api.exemple.tn' && found=1
+            if echo "$body" | grep -q '__MILIEU_API_URL__'; then echo "Repère encore présent dans $js"; exit 1; fi
+          done
+          [ "$found" = 1 ] || { echo "Adresse de l'API non injectée"; exit 1; }
+          curl -fsSI http://localhost:8080/ | grep -qi 'x-frame-options: DENY'
+      - name: Sans adresse d'API, le conteneur refuse de démarrer
+        run: |
+          docker run -d --name bad -e API_URL= "$IMAGE:ci" || true
+          sleep 3
+          [ "$(docker inspect -f '{{.State.Running}}' bad)" = "false" ] || { echo "Aurait dû refuser de démarrer"; exit 1; }
+          docker logs bad 2>&1 | grep -q 'API_URL manquante'
+      # Serveurs ARM (ex. Oracle Cloud « Always Free ») : l'image est publiée en amd64 ET arm64, même nom, même tag.
+      - name: Émulation ARM pour la publication
+        if: github.event_name == 'push'
+        uses: docker/setup-qemu-action@v3
+      - name: Constructeur multi-architecture
+        if: github.event_name == 'push'
+        uses: docker/setup-buildx-action@v3
+      - name: Publication sur GitHub Container Registry, amd64 + arm64 (main et tags uniquement)
+        if: github.event_name == 'push'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          tags="-t $IMAGE:sha-${GITHUB_SHA::7}"
+          [ "$GITHUB_REF_NAME" = "main" ] && tags="$tags -t $IMAGE:main"
+          [[ "$GITHUB_REF" == refs/tags/v* ]] && tags="$tags -t $IMAGE:${GITHUB_REF_NAME#v}"
+          docker buildx build --platform linux/amd64,linux/arm64 --secret id=npm_token,env=NPM_TOKEN $tags --push .
+          docker buildx imagetools inspect "$IMAGE:sha-${GITHUB_SHA::7}" | grep -q 'linux/arm64' || { echo "Version arm64 absente"; exit 1; }
