@@ -38,3 +38,9 @@ $env:EXPO_PUBLIC_DATA_SOURCE='api'; npx expo start --web
 ```
 
 Tests : `npx vitest run`. Types : `npx tsc --noEmit`.
+
+## Image web (déploiement)
+
+L'app client est publiée comme image Docker `ghcr.io/youssefghozzi/milieu-app-web` (amd64 + arm64), construite et testée par la CI à chaque push sur `main`.
+L'adresse de l'API est donnée au démarrage, pas au build : `docker run -p 8080:80 -e API_URL=https://api.exemple.tn ghcr.io/youssefghozzi/milieu-app-web:main`.
+Le dépôt est autonome : `@milieu/contracts` et `@milieu/ui` viennent de GitHub Packages (`NPM_TOKEN` avec `read:packages`, voir `.npmrc`).
