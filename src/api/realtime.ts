@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { io, type Socket } from 'socket.io-client';
 import { http, queryClient } from './client';
-import { API_URL } from './config';
+import { REALTIME_URL } from './config';
 import { tokenStore } from './tokens';
 
 const KNOWN = new Set<string>(REALTIME_EVENTS);
@@ -22,7 +22,7 @@ export function useRealtime(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
     let stopped = false;
-    const socket = io(API_URL, {
+    const socket = io(REALTIME_URL, {
       path: REALTIME_PATH,
       transports: ['websocket'],
       // Le jeton est relu à chaque (re)connexion : toujours le plus récent.
