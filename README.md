@@ -13,6 +13,7 @@ App membre MILIEU (submodule `apps/app` du dépôt `milieu`) : Expo Router, Nati
 | --- | --- | --- |
 | `EXPO_PUBLIC_DATA_SOURCE` | `local` (défaut) ou `api` | Démo autonome, ou vraie API |
 | `EXPO_PUBLIC_API_URL` | ex. `https://api.milieu.tn` | Adresse de l'API (défaut `http://localhost:3000`) |
+| `EXPO_PUBLIC_REALTIME_URL` | ex. `https://api.milieu.tn` | Adresse du temps réel (défaut : celle de l'API). À part seulement si l'API passe par un relais sans WebSocket (recette Vercel → Render) |
 | `EXPO_PUBLIC_STAFF_URL` | ex. `https://staff.milieu.tn` | Lien « Ouvrir MILIEU Staff » pour les comptes de l'équipe |
 
 En mode `api` :
